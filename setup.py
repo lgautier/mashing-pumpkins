@@ -13,8 +13,9 @@ CLASSIFIERS = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: C++",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.5",
-    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering",
 ]
 
 if sys.platform == 'darwin':
@@ -26,7 +27,7 @@ else:
     raise ValueError("The platform %s is not supported." % sys.platform)
 
 mmh_mod = Extension("%s._murmurhash3" % PACKAGENAME,
-                    sources=["src/_murmurhash.cpp", "src/MurmurHash3.cpp"],
+                    sources=["src/_murmurhash3.cpp", "src/MurmurHash3.cpp"],
                     include_dirs=["src",],
                     language="c++")
 
@@ -36,6 +37,7 @@ setup(
     description = "Hash sketches of sequences",
     license = "MIT",
     author = "Laurent Gautier",
+    email = "lgautier@gmail.com",
     packages = [PACKAGENAME],
     package_dir = {PACKAGENAME: 'src'},
     ext_modules = [mmh_mod],
