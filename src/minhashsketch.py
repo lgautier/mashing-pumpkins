@@ -6,7 +6,11 @@ class MaxHashNgramSketch(object):
     MaxHash Sketch
     """
 
-    def __init__(self, nsize: int, maxsize: int, hashfun,
+    _anynew = None
+    
+    def __init__(self, nsize: int,
+                 maxsize: int,
+                 hashfun,
                  heap : list = None,
                  nvisited: int = 0):
         self._nsize = nsize
@@ -50,12 +54,23 @@ class MaxHashNgramSketch(object):
     def __contains__(self, elt):
         return elt in self._heapset
 
+    def add_hashvalues(self, values):
+        make_elt = self._make_elt
+        heaptop = heap[0][0]
+        for h in values:
+            if h  > heaptop:
+                elt = make_elt(h, None)
+                if elt not in heapset:
+                    out = self._replace((h, ngram))
+                    heaptop = heap[0][0]
+        
     def add(self, s):
         hashfun = self._hashfun
         heap = self._heap
         heapset = self._heapset
         maxsize = self._maxsize
         nsize = self._nsize
+        anynew = self._anynew
         i = None
         lheap = len(heap)
         if lheap > 0:
@@ -71,11 +86,15 @@ class MaxHashNgramSketch(object):
                     self._add(elt)
                     heaptop = heap[0][0]
                     lheap += 1
+                if anynew is not None:
+                    anynew(elt)
             elif h  > heaptop:
                 elt = self._make_elt(h, ngram)
                 if elt not in heapset:
                     out = self._replace((h, ngram))
                     heaptop = heap[0][0]
+                if anynew is not None:
+                    anynew(elt)
         if i is not None:
              self._nvisited += (i+1)
 
@@ -87,16 +106,19 @@ class MaxHashNgramSketch(object):
         return iter(sorted(self._heap))
 
 def test_MaxHashNgramSketch():
+
+    import random
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
+
     import mmh3
     hashfun = mmh3.hash128
     nsize = 21
     mhs = MaxHashNgramSketch(nsize, 10, hashfun)
-    import random
-    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
     mhs.add(sequence)
     assert mhs.nvisited == (50-nsize)
     assert len(mhs) == 10
     assert len(mhs._heap) == len(mhs._heapset)
+    
     allhash = list()
     for i in range(0, len(sequence)-nsize):
         ngram = sequence[i:(i+nsize)]
@@ -104,40 +126,75 @@ def test_MaxHashNgramSketch():
     allhash.sort(reverse=True)
     maxhash = set(allhash[:10])
     assert len(maxhash ^ mhs._heapset) == 0
-
-
-class MaxHashNgramCountSketch(object):
+    
+    #FIXME: add test for .add_hashvalues
+    #FIXME: add test for .update
+    
+    
+class MaxHashNgramCountSketch(MaxHashNgramSketch):
     """
     MaxHash Sketch where the number of times an hash value occurs is stored
     """
 
     def __init__(self, nsize: int, maxsize: int, hashfun,
                  heap : list = None,
-                 heapcount : dict = None,
+                 count : Counter = None,
                  nvisited: int = 0):
-        super(MaxHashNgramCountSketch, self).__init__(nsize, maxsize, hashfun,
-                                                      heap = heap, nvisited = nvisited)
-        if heapcount is None:
-            heapcount = Counter()
-            for elt in heap:
-                if elt in heapcount:
-                    raise ValueError('Elements in the heap must be unique.')
-                else:
-                    heapcount[elt] = 1
-        self._heapcount = heapcount
+        super().__init__(nsize, maxsize, hashfun,
+                         heap = heap, nvisited = nvisited)
+        if count is None:
+            count = Counter()
+            if heap is not None:
+                for elt in heap:
+                    if elt in count:
+                        raise ValueError('Elements in the heap must be unique.')
+                    else:
+                        count[elt] = 1
+        else:
+            if len(self._heapset ^ set(count.keys())) > 0:
+                raise ValueError("Mismatching keys with the parameter 'count'.")
+        self._count = count
 
     def _add(self, elt):
-        heappush(self._heap, elt)
-        self._heapcount[elt] += 1
+        super()._add(elt)
 
     def _replace(self, elt):
-        out = heappushpop(self._heap, elt)
-        del(self._heapcount[out])
-        self._heapcount[elt] += 1
+        out = super()._replace(elt)
+        del(self._count[out])
         return out
 
     def __contains__(self, elt):
         return elt in self._heapcount
+
+    def _anynew(self, elt):
+        self._count[elt] += 1
+
+def test_MaxHashNgramCountSketch():
+
+    import random
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
+
+    import mmh3
+    hashfun = mmh3.hash128
+    nsize = 3
+    mhs = MaxHashNgramCountSketch(nsize, 10, hashfun)
+    mhs.add(sequence)
+    assert mhs.nvisited == (50-nsize)
+    assert len(mhs) == 10
+    assert len(mhs._heap) == len(mhs._heapset)
+
+    allcounthash = Counter()
+    for i in range(0, len(sequence)-nsize):
+        ngram = sequence[i:(i+nsize)]
+        allcounthash[(hashfun(ngram), ngram)] += 1
+    maxhash = sorted(allcounthash.keys(), reverse=True)[:10]
+    assert len(set(maxhash) ^ mhs._heapset) == 0
+
+    for elt, value in mhs._count.items():
+        assert allcounthash[elt] == value
+    #FIXME: add test for .add_hashvalues
+    #FIXME: add test for .update
+
     
 class FrozenHashNgramSketch(object):
 
@@ -149,4 +206,3 @@ class FrozenHashNgramSketch(object):
 
     def jaccard(self, obj):
         return len(self._sketch.intersect(obj._sketch)) /  len(self._sketch.union(obj._sketch))
-
