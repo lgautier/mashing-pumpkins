@@ -80,7 +80,15 @@ def test_FrozenHashNgramSketch():
     maxsize = 5
     sketch = set((1,2,3,4,5))
     nvisited = len(sketch)
-    mhs = FrozenHashNgramSketch(sketch, nsize, maxsize, nvisited=nvisited)
+    
+    mhs = FrozenHashNgramSketch(sketch, nsize, maxsize = maxsize, nvisited=nvisited)
+    assert mhs.maxsize == maxsize
+    assert mhs.nsize == nsize
+    assert mhs.nvisited == nvisited
+    assert len(mhs) == maxsize
+    assert len(mhs._sketch) == maxsize
+
+    mhs = FrozenHashNgramSketch(sketch, nsize)
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
     assert mhs.nvisited == nvisited
@@ -89,6 +97,5 @@ def test_FrozenHashNgramSketch():
     
     assert mhs.jaccard(mhs) == 1
     sketch = set((1,2,3,6,7))
-    mhs_b = FrozenHashNgramSketch(sketch, nsize, maxsize, nvisited=len(sketch))
+    mhs_b = FrozenHashNgramSketch(sketch, nsize, maxsize = maxsize, nvisited=len(sketch))
     assert mhs.jaccard(mhs_b) == 3/7
-

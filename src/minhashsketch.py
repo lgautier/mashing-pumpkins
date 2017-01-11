@@ -171,6 +171,14 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
                  heap : list = None,
                  count : Counter = None,
                  nvisited: int = 0):
+        """
+        - nsize: size of the ngrams / kmers
+        - maxsize: maximum size for the sketch
+        - hashfun: function used for hashing - `hashfun(byteslike) -> hash value`
+        - heap: heapified list (if unsure about what it is, don't change the default)
+        - count: a collections.Counter
+        - nvisited: number of kmers visited so far
+        """
         super().__init__(nsize, maxsize, hashfun,
                          heap = heap, nvisited = nvisited)
         if count is None:
@@ -203,7 +211,24 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
     
 class FrozenHashNgramSketch(object):
 
-    def __init__(self, sketch : set, nsize : int, maxsize : int, nvisited: int = 0):
+    def __init__(self, sketch : set, nsize : int, maxsize : int = None, nvisited: int = None):
+        """
+        Create an instance from:
+        - setobj: a set
+        - nsize: a kmer/ngram size
+        - maxsize: a maximum size for the input set (if missing, this is assumed to be len(setobj)
+        - nvisited: the number of kmers/ngrams visited to create setobj
+        """
+
+        if maxsize is None:
+            maxsize = len(setobj)
+        elif maxsize < len(setobj):
+            raise ValueError("The maximum size cannot be smaller than the number of objects in the set.")
+        if nvisited is None:
+            nvisited = len(setobj)
+        elif nvisited < len(setobj):
+            raise ValueError("'nvisited' cannot be smaller than the number of objects in the set.")
+
         self._sketch = frozenset(sketch)
         self._nsize = nsize
         self._maxsize = maxsize
@@ -225,8 +250,9 @@ class FrozenHashNgramSketch(object):
         return self._nvisited
 
     def jaccard(self, obj):
+        """ Compute the Jaccard index between this sketch and an other sketch"""
         return len(self._sketch.intersection(obj._sketch)) /  len(self._sketch.union(obj._sketch))
 
     def __len__(self):
+        """ Return the number of elements in the set. """
         return len(self._sketch)
-
