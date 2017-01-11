@@ -11,7 +11,7 @@ install:
 
 # command to run tests
 script:
-  - py.test --cov=. 
+  - py.test --cov=src 
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

@@ -1,0 +1,3 @@
+[run]
+include=src/*.py
+omit=src/test_*.py
