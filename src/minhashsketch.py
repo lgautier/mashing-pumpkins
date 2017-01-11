@@ -3,7 +3,7 @@ from collections import Counter
 
 class MaxHashNgramSketch(object):
     """
-    MaxHash Sketch
+    MaxHash Sketch.
     """
 
     _anynew = None
@@ -16,7 +16,7 @@ class MaxHashNgramSketch(object):
         """
         - nsize: size of the ngrams / kmers
         - maxsize: maximum size for the sketch
-        - hashfun: function used for hashing
+        - hashfun: function used for hashing - `hashfun(byteslike) -> hash value`
         - heap: heapified list (if unsure about what it is, don't change the default)
         - nvisited: number of kmers visited so far
         """
@@ -46,6 +46,14 @@ class MaxHashNgramSketch(object):
         return self._nvisited
 
     def _add(self, elt):
+        """ 
+        Add an element.
+
+        - elt: an object as returned by the method `make_elt()` 
+
+        Note: This method does not check whether the element is satisfying
+        the MaxHash property,        
+        """
         self._heapset.add(elt)
         heappush(self._heap, elt)
 
@@ -57,12 +65,26 @@ class MaxHashNgramSketch(object):
         return out
 
     def _make_elt(self, h, ngram):
+        """
+        Make an element to store into the sketch
+        
+        - h: an hash value
+        - ngram: the object (ngram/kmer) at the source of the hash value
+        """
         return (h, bytes(ngram))
 
     def __len__(self):
+        """
+        Return the number of elements in the sketch. See also the property 'nvisited'.
+        """
         return len(self._heap)
     
     def __contains__(self, elt):
+        """
+        Return whether a given element is in the sketch
+
+        - elt: an object as returned by the method `make_elt()` 
+        """
         return elt in self._heapset
 
     def add_hashvalues(self, values):
@@ -77,7 +99,10 @@ class MaxHashNgramSketch(object):
         
     def add(self, s):
         """ Add all ngrams/kmers of length self.nsize found in the sequence "s".
-        - s: a bytes-like sequence
+
+        - s: a bytes-like sequence than can be sliced, and the slices be consummed
+             by the function in the property `hashfun` (given to the constructor)
+
         """
         hashfun = self._hashfun
         heap = self._heap
@@ -113,10 +138,18 @@ class MaxHashNgramSketch(object):
              self._nvisited += (i+1)
 
     def update(self, obj):
+        """
+        Update the sketch with elements from `obj`.
+
+        - obj: an iterable of elements (each element as returned by `_make_elt()`
+        """
         for x in obj:
             self.add(x)
             
     def __iter__(self):
+        """
+        Return an iterator over the elements in the sketch.
+        """
         return iter(sorted(self._heap))
 
 def test_MaxHashNgramSketch():
