@@ -5,8 +5,13 @@ python:
   - "3.6"
 
 # command to install dependencies
-install: "pip install mmh3"
+install:
+  - pip install mmh3
+  - pip install pytest-cov
 
 # command to run tests
 script:
-  - py.test src/minhashsketch.py
+  - py.test src/minhashsketch.py --cov=mashingpumpkins src/
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
