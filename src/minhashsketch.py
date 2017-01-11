@@ -89,6 +89,11 @@ class MaxHashNgramSketch(object):
         return elt in self._heapset
 
     def add_hashvalues(self, values):
+        """
+        Add hash values while conserving the MaxHash characteristic of the set.
+
+        - values: an iterable of hash values
+        """
         make_elt = self._make_elt
         heaptop = heap[0][0]
         for h in values:
