@@ -13,6 +13,13 @@ class MaxHashNgramSketch(object):
                  hashfun,
                  heap : list = None,
                  nvisited: int = 0):
+        """
+        - nsize: size of the ngrams / kmers
+        - maxsize: maximum size for the sketch
+        - hashfun: function used for hashing
+        - heap: heapified list (if unsure about what it is, don't change the default)
+        - nvisited: number of kmers visited so far
+        """
         self._nsize = nsize
         self._maxsize = maxsize
         self._hashfun = hashfun
@@ -25,14 +32,17 @@ class MaxHashNgramSketch(object):
 
     @property
     def maxsize(self):
+        """ Maximum size for the sketch. """
         return self._maxsize
 
     @property
     def nsize(self):
+        """ Size of the ngrams / kmers. """
         return self._nsize
 
     @property
     def nvisited(self):
+        """ Number of ngrams / kmers visited (considered for inclusion) so far. """
         return self._nvisited
 
     def _add(self, elt):
@@ -66,6 +76,9 @@ class MaxHashNgramSketch(object):
                     heaptop = heap[0][0]
         
     def add(self, s):
+        """ Add all ngrams/kmers of length self.nsize found in the sequence "s".
+        - s: a bytes-like sequence
+        """
         hashfun = self._hashfun
         heap = self._heap
         heapset = self._heapset
