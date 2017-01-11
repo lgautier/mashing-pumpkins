@@ -221,12 +221,12 @@ class FrozenHashNgramSketch(object):
         """
 
         if maxsize is None:
-            maxsize = len(setobj)
-        elif maxsize < len(setobj):
+            maxsize = len(sketch)
+        elif maxsize < len(sketch):
             raise ValueError("The maximum size cannot be smaller than the number of objects in the set.")
         if nvisited is None:
-            nvisited = len(setobj)
-        elif nvisited < len(setobj):
+            nvisited = len(sketch)
+        elif nvisited < len(sketch):
             raise ValueError("'nvisited' cannot be smaller than the number of objects in the set.")
 
         self._sketch = frozenset(sketch)
