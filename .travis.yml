@@ -11,7 +11,7 @@ install:
 
 # command to run tests
 script:
-  - py.test --cov=src src/minhashsketch.py
+  - py.test --cov=. 
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
