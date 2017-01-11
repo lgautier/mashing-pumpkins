@@ -44,6 +44,7 @@ class MaxHashNgramSketch(object):
         heapset.add(elt)
         out = heapreplace(self._heap, elt)
         heapset.remove(out)
+        return out
 
     def _make_elt(self, h, ngram):
         return (h, bytes(ngram))
@@ -58,7 +59,7 @@ class MaxHashNgramSketch(object):
         make_elt = self._make_elt
         heaptop = heap[0][0]
         for h in values:
-            if h  > heaptop:
+            if h  >= heaptop:
                 elt = make_elt(h, None)
                 if elt not in heapset:
                     out = self._replace((h, ngram))
@@ -77,7 +78,7 @@ class MaxHashNgramSketch(object):
             heaptop = heap[0][0]
         else:
             heaptop = None
-        for i in range(0, len(s)-nsize):
+        for i in range(0, len(s)-nsize+1):
             ngram = s[i:(i+nsize)]
             h = hashfun(ngram)
             if lheap < maxsize:
@@ -88,7 +89,7 @@ class MaxHashNgramSketch(object):
                     lheap += 1
                 if anynew is not None:
                     anynew(elt)
-            elif h  > heaptop:
+            elif h  >= heaptop:
                 elt = self._make_elt(h, ngram)
                 if elt not in heapset:
                     out = self._replace((h, ngram))
@@ -108,6 +109,7 @@ class MaxHashNgramSketch(object):
 def test_MaxHashNgramSketch():
 
     import random
+    random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
     import mmh3
@@ -115,7 +117,7 @@ def test_MaxHashNgramSketch():
     nsize = 21
     mhs = MaxHashNgramSketch(nsize, 10, hashfun)
     mhs.add(sequence)
-    assert mhs.nvisited == (50-nsize)
+    assert mhs.nvisited == (50-nsize+1)
     assert len(mhs) == 10
     assert len(mhs._heap) == len(mhs._heapset)
     
@@ -172,22 +174,26 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
 def test_MaxHashNgramCountSketch():
 
     import random
+    random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
     import mmh3
     hashfun = mmh3.hash128
-    nsize = 3
-    mhs = MaxHashNgramCountSketch(nsize, 10, hashfun)
+    nsize = 2
+    nhash = 10
+    mhs = MaxHashNgramCountSketch(nsize, nhash, hashfun)
     mhs.add(sequence)
-    assert mhs.nvisited == (50-nsize)
-    assert len(mhs) == 10
-    assert len(mhs._heap) == len(mhs._heapset)
+    assert mhs.nvisited == (50-nsize+1)
+    assert len(mhs) == nhash
+    assert len(mhs._heap) == nhash
+    assert len(mhs._heapset) == nhash
+    assert len(mhs._count) == nhash
 
     allcounthash = Counter()
     for i in range(0, len(sequence)-nsize):
         ngram = sequence[i:(i+nsize)]
         allcounthash[(hashfun(ngram), ngram)] += 1
-    maxhash = sorted(allcounthash.keys(), reverse=True)[:10]
+    maxhash = sorted(allcounthash.keys(), reverse=True)[:nhash]
     assert len(set(maxhash) ^ mhs._heapset) == 0
 
     for elt, value in mhs._count.items():
