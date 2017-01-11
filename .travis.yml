@@ -9,4 +9,4 @@ install: "pip install mmh3"
 
 # command to run tests
 script:
-  - py.test
+  - py.test src/minhashsketch.py
