@@ -161,18 +161,22 @@ def test_MaxHashNgramSketch():
     import mmh3
     hashfun = mmh3.hash128
     nsize = 21
-    mhs = MaxHashNgramSketch(nsize, 10, hashfun)
+    maxsize = 10
+    mhs = MaxHashNgramSketch(nsize, maxsize, hashfun)
+    assert mhs.mazsize == maxsize
+    assert mhs.nsize == nsize
     mhs.add(sequence)
     assert mhs.nvisited == (50-nsize+1)
-    assert len(mhs) == 10
-    assert len(mhs._heap) == len(mhs._heapset)
+    assert len(mhs) == maxsize
+    assert len(mhs._heap) == maxsize
+    assert len(mhs._heapset) == maxsize
     
     allhash = list()
     for i in range(0, len(sequence)-nsize):
         ngram = sequence[i:(i+nsize)]
         allhash.append((hashfun(ngram), ngram))
     allhash.sort(reverse=True)
-    maxhash = set(allhash[:10])
+    maxhash = set(allhash[:maxsize])
     assert len(maxhash ^ mhs._heapset) == 0
     
     #FIXME: add test for .add_hashvalues
@@ -226,20 +230,22 @@ def test_MaxHashNgramCountSketch():
     import mmh3
     hashfun = mmh3.hash128
     nsize = 2
-    nhash = 10
-    mhs = MaxHashNgramCountSketch(nsize, nhash, hashfun)
+    maxsize = 10
+    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun)
+    assert mhs.maxsize == maxsize
+    assert mhs.nsize == nsize
     mhs.add(sequence)
     assert mhs.nvisited == (50-nsize+1)
-    assert len(mhs) == nhash
-    assert len(mhs._heap) == nhash
-    assert len(mhs._heapset) == nhash
-    assert len(mhs._count) == nhash
+    assert len(mhs) == maxsize
+    assert len(mhs._heap) == maxsize
+    assert len(mhs._heapset) == maxsize
+    assert len(mhs._count) == maxsize
 
     allcounthash = Counter()
     for i in range(0, len(sequence)-nsize):
         ngram = sequence[i:(i+nsize)]
         allcounthash[(hashfun(ngram), ngram)] += 1
-    maxhash = sorted(allcounthash.keys(), reverse=True)[:nhash]
+    maxhash = sorted(allcounthash.keys(), reverse=True)[:maxsize]
     assert len(set(maxhash) ^ mhs._heapset) == 0
 
     for elt, value in mhs._count.items():
