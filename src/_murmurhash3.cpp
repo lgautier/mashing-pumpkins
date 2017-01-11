@@ -68,7 +68,7 @@ hasharray(PyObject * self, PyObject * args)
   }
 
   unsigned long long * hasharray = (unsigned long long *) arraybuf.buf;
-  const Py_ssize_t maxi = olength < (length-width) ? olength : (length-width); 
+  const Py_ssize_t maxi = olength < (length-width+1) ? olength : (length-width+1); 
   
   uint64_t outh[2] = {0, 0};
   for (Py_ssize_t i=0; i < maxi; i++) {
