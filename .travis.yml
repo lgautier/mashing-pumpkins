@@ -6,12 +6,13 @@ python:
 
 # command to install dependencies
 install:
-  - pip install mmh3
-  - pip install pytest-cov
+  - pip install mmh3 --use-mirrors
+  - pip install pytest-cov --use-mirrors
+  - pip install -q -e . --use-mirrors
 
 # command to run tests
 script:
-  - py.test --cov=src 
+  - python -m pytest --cov=mashingpumpkins src/
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
