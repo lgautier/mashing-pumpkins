@@ -8,7 +8,8 @@ python:
 install:
   - pip install mmh3
   - pip install pytest-cov
-
+  - pip install .
+  
 # command to run tests
 script:
   - python -m pytest --cov=mashingpumpkins src/
