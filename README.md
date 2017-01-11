@@ -15,6 +15,7 @@ Python 3.5 and a C++ compiler are pretty much everything needed. With pip, insta
 
 ### Misc.
 
+```
 Q: Why Python 3-only ?
 A: Because I am coming from the future...
-
+```
