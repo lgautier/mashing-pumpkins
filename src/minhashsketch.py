@@ -170,6 +170,7 @@ def test_MaxHashNgramSketch():
     assert len(mhs) == maxsize
     assert len(mhs._heap) == maxsize
     assert len(mhs._heapset) == maxsize
+    assert len(tuple(mhs)) == maxsize
     
     allhash = list()
     for i in range(0, len(sequence)-nsize):
@@ -240,6 +241,7 @@ def test_MaxHashNgramCountSketch():
     assert len(mhs._heap) == maxsize
     assert len(mhs._heapset) == maxsize
     assert len(mhs._count) == maxsize
+    assert len(tuple(mhs)) == maxsize
 
     allcounthash = Counter()
     for i in range(0, len(sequence)-nsize):
