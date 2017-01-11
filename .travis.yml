@@ -1,8 +1,12 @@
 language: python
+
 python:
   - "3.5"
   - "3.6"
+
 # command to install dependencies
 install: "pip install mmh3"
+
 # command to run tests
-script: pytest
+script:
+  - py.test
