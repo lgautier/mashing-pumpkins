@@ -1,9 +1,11 @@
+import pytest
+
 import random
 import array
 from collections import Counter
 from mashingpumpkins._murmurhash3 import hasharray
 from mashingpumpkins.minhashsketch import (MaxHashNgramSketch, MaxHashNgramCountSketch, FrozenHashNgramSketch)
-    
+
 def test_MaxHashNgramSketch():
 
     random.seed(123)
@@ -126,8 +128,14 @@ def test_FrozenHashNgramSketch():
     assert mhs.nvisited == nvisited
     assert len(mhs) == maxsize
     assert len(mhs._sketch) == maxsize
-    
+
     assert mhs.jaccard(mhs) == 1
     sketch = set((1,2,3,6,7))
     mhs_b = FrozenHashNgramSketch(sketch, nsize, maxsize = maxsize, nvisited=len(sketch))
     assert mhs.jaccard(mhs_b) == 3/7
+
+    with pytest.raises(ValueError):
+        mhs = FrozenHashNgramSketch(sketch, nsize, maxsize = len(sketch)-1)
+
+    with pytest.raises(ValueError):
+        mhs = FrozenHashNgramSketch(sketch, nsize, nvisited = len(sketch)-1)
