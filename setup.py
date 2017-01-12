@@ -15,6 +15,7 @@ CLASSIFIERS = [
     "Programming Language :: C++",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
     "Topic :: Scientific/Engineering",
 ]
 
@@ -30,6 +31,10 @@ mmh_mod = Extension("%s._murmurhash3" % PACKAGENAME,
                     sources=["src/_murmurhash3.cpp", "src/MurmurHash3.cpp"],
                     include_dirs=["src",],
                     language="c++")
+xxh_mod = Extension("%s._xxhash" % PACKAGENAME,
+                    sources=["src/_xxhash.c", "src/xxhash.c"],
+                    include_dirs=["src",],
+                    language="c")
 
 setup(
     name = PACKAGENAME,
@@ -40,7 +45,7 @@ setup(
     email = "lgautier@gmail.com",
     packages = [PACKAGENAME],
     package_dir = {PACKAGENAME: 'src'},
-    ext_modules = [mmh_mod],
+    ext_modules = [mmh_mod, xxh_mod],
     classifiers = CLASSIFIERS)
 
 

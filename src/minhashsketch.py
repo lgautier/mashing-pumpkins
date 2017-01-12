@@ -125,7 +125,7 @@ class MaxHashNgramSketch(object):
                     anynew(elt)
 
         
-    def add(self, s, w=100, hashtype="Q"):
+    def add(self, s, w=500, hashtype="Q"):
         """ Add all ngrams/kmers of length self.nsize found in the sequence "s".
 
         - s: a bytes-like sequence than can be sliced, and the slices be consummed
