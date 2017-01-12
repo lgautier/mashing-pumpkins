@@ -6,7 +6,7 @@ import warnings
 PACKAGENAME = "mashingpumpkins"
 VERSION="0.1"
 
-EXTRA_COMPILE = ['-pedantic']
+extra_compile_args = ['-pedantic']
 
 CLASSIFIERS = [
     "Intended Audience :: Science/Research",
@@ -31,10 +31,16 @@ mmh_mod = Extension("%s._murmurhash3" % PACKAGENAME,
                     sources=["src/_murmurhash3.cpp", "src/MurmurHash3.cpp"],
                     include_dirs=["src",],
                     language="c++")
+
 xxh_mod = Extension("%s._xxhash" % PACKAGENAME,
                     sources=["src/_xxhash.c", "src/xxhash.c"],
                     include_dirs=["src",],
-                    language="c")
+                    language="c",
+                    extra_compile_args = extra_compile_args + \
+                    ['-O3',
+                     '-Wall', '-Wextra', '-Wcast-qual', '-Wcast-align', '-Wshadow',
+                     '-Wstrict-aliasing=1', '-Wswitch-enum', '-Wdeclaration-after-statement',
+                     '-Wstrict-prototypes', '-Wundef'])
 
 setup(
     name = PACKAGENAME,
