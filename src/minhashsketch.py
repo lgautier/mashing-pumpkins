@@ -125,13 +125,12 @@ class MaxHashNgramSketch(object):
                     anynew(elt)
 
         
-    def add(self, s, w=500, hashtype="Q"):
+    def add(self, s, hashbuffer=array.array('Q', [0,]*100)):
         """ Add all ngrams/kmers of length self.nsize found in the sequence "s".
 
         - s: a bytes-like sequence than can be sliced, and the slices be consummed
              by the function in the property `hashfun` (given to the constructor)
-        - w: width of the sequence in a batch
-        - hashtype: type for hashed values
+        - hashbuffer: a buffer array to store hash values during batch C calls
 
         """
         hashfun = self._hashfun
@@ -139,11 +138,11 @@ class MaxHashNgramSketch(object):
         heapset = self._heapset
         maxsize = self._maxsize
         nsize = self._nsize
+        w = len(hashbuffer)
         assert nsize <= w
         anynew = self._anynew
         i = None
         lheap = len(heap)
-        hashbuffer = array.array(hashtype, [0,]*w)
         if lheap > 0:
             heaptop = heap[0][0]
         else:
