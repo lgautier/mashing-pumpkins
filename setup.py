@@ -30,7 +30,9 @@ else:
 mmh_mod = Extension("%s._murmurhash3" % PACKAGENAME,
                     sources=["src/_murmurhash3.cpp", "src/MurmurHash3.cpp"],
                     include_dirs=["src",],
-                    language="c++")
+                    language="c++",
+                    extra_compile_args = extra_compile_args + \
+                    ['-O3'])                    
 
 xxh_mod = Extension("%s._xxhash" % PACKAGENAME,
                     sources=["src/_xxhash.c", "src/xxhash.c"],
