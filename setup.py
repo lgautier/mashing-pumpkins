@@ -40,6 +40,7 @@ xxh_mod = Extension("%s._xxhash" % PACKAGENAME,
                     language="c",
                     extra_compile_args = extra_compile_args + \
                     ['-O3',
+                     '-std=c99',
                      '-Wall', '-Wextra', '-Wcast-qual', '-Wcast-align', '-Wshadow',
                      '-Wstrict-aliasing=1', '-Wswitch-enum', '-Wdeclaration-after-statement',
                      '-Wstrict-prototypes', '-Wundef'])
