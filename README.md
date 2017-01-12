@@ -9,6 +9,11 @@ Not much to read about it beside the notebooks in the [doc/](doc/) and docstring
 
 [MASH](https://github.com/marbl/Mash) and [sourmash](https://github.com/dib-lab/sourmash) started it all. They have good documentation. Check them out !
 
+- MurmurHash3 code is in the public domain (author: Austin Appleby)
+
+- XXHash code is released under BSD-2 license (author: Yann Collet)
+
+
 ## Installation
 
 Python 3.5 or 3.6 and a C++ compiler are pretty much everything needed. With pip, installing the "master" branch can be done with:
