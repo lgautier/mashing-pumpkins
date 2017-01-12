@@ -72,7 +72,7 @@ class MaxHashNgramSketch(object):
         - h: an hash value
         - ngram: the object (ngram/kmer) at the source of the hash value
         """
-        return (h, bytes(ngram))
+        return (h, ngram)
 
     def __len__(self):
         """
@@ -91,17 +91,39 @@ class MaxHashNgramSketch(object):
     def add_hashvalues(self, values):
         """
         Add hash values while conserving the MaxHash characteristic of the set.
+        
+        Note: The attribute `nvisited` is not incremented.
 
         - values: an iterable of hash values
         """
         make_elt = self._make_elt
-        heaptop = heap[0][0]
+        anynew = self._anynew
+        heap = self._heap
+        heapset = self._heapset
+        maxsize = self._maxsize
+        lheap = len(heap)
+        if lheap > 0:
+            heaptop = heap[0][0]
+        else:
+            heaptop = None
+        ngram = None
         for h in values:
+            if lheap < maxsize:
+                elt = self._make_elt(h, ngram)
+                if elt not in heapset:
+                    self._add(elt)
+                    heaptop = heap[0][0]
+                    lheap += 1
+                if anynew is not None:
+                    anynew(elt)
             if h  >= heaptop:
-                elt = make_elt(h, None)
+                elt = make_elt(h, ngram)
                 if elt not in heapset:
                     out = self._replace((h, ngram))
                     heaptop = heap[0][0]
+                if anynew is not None:
+                    anynew(elt)
+
         
     def add(self, s, w=100, hashtype="Q"):
         """ Add all ngrams/kmers of length self.nsize found in the sequence "s".

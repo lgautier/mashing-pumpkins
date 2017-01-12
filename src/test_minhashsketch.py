@@ -35,6 +35,38 @@ def test_MaxHashNgramSketch():
     #FIXME: add test for .add_hashvalues
     #FIXME: add test for .update
 
+
+def test_MaxHashNgramSketch_add_hashvalue():
+
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
+    
+    hashfun = hasharray
+    nsize = 21
+    maxsize = 10
+    mhs_a = MaxHashNgramSketch(nsize, maxsize, hashfun)
+    mhs_a.add(sequence)
+
+    mhs_b = MaxHashNgramSketch(nsize, maxsize, hashfun)
+    hbuffer = array.array('Q', [0, ])
+    seq_hash = list()
+    for i in range(0, len(sequence)-nsize):
+        ngram = sequence[i:(i+nsize)]
+        hashfun(ngram, nsize, hbuffer)
+        seq_hash.append((ngram, hbuffer[0]))    
+    mhs_b.add_hashvalues(x[1] for x in seq_hash)
+
+    assert mhs_b.nvisited == 0 # !!! nvisited it not updated
+    assert len(mhs_b) == maxsize
+    assert len(mhs_b._heap) == maxsize
+    assert len(mhs_b._heapset) == maxsize
+    assert len(tuple(mhs_b)) == maxsize
+    
+    assert len(set(x[0] for x in mhs_a) ^ set(x[0] for x in mhs_b)) == 0
+    
+    #FIXME: add test for .add_hashvalues
+    #FIXME: add test for .update
+
     
 def test_MaxHashNgramCountSketch():
 
