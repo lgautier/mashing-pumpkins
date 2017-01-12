@@ -8,30 +8,42 @@ from mashingpumpkins.minhashsketch import (MaxHashNgramSketch, MaxHashNgramCount
 
 def test_MaxHashNgramSketch():
 
+    # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
+    # set the hashing function, size of ngrams, max size for the minhash sketch
     hashfun = hasharray
     nsize = 21
     maxsize = 10
+    
     mhs = MaxHashNgramSketch(nsize, maxsize, hashfun)
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
+
+    # add the sequence
     mhs.add(sequence)
+
+    # check that all ngrams/kmers visited when adding sequence
     assert mhs.nvisited == (50-nsize+1)
+    # check that the minhash sketch is full
     assert len(mhs) == maxsize
     assert len(mhs._heap) == maxsize
     assert len(mhs._heapset) == maxsize
     assert len(tuple(mhs)) == maxsize
-    
+
+    # extract all ngrams/kmers of length nsize in the test sequence
     allhash = list()
     hbuffer = array.array('Q', [0, ])
-    for i in range(0, len(sequence)-nsize):
+    for i in range(0, len(sequence)-nsize+1):
         ngram = sequence[i:(i+nsize)]
         hashfun(ngram, nsize, hbuffer)
         allhash.append((hbuffer[0], ngram))
+    # slice the 10 biggest out
     allhash.sort(reverse=True)
     maxhash = set(allhash[:maxsize])
+
+    # check that the slice above matches the content of the maxhash sketch
     assert len(maxhash ^ mhs._heapset) == 0
     
     #FIXME: add test for .add_hashvalues
