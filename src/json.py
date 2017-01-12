@@ -1,4 +1,5 @@
 import ijson
+import jsonschema
 
 
 def validate(sketch):
@@ -14,3 +15,10 @@ def readsketch_iter(iterable):
     Returns a `dict` with a sketch information
     """
     pass
+
+def readjamschema(schema):
+    """
+    Read a JAM definition schema
+    """
+    pass
+    
