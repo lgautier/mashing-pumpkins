@@ -125,11 +125,11 @@ class MaxHashNgramSketch(object):
                     anynew(elt)
 
         
-    def add(self, s, hashbuffer=array.array('Q', [0,]*100)):
+    def add(self, seq, hashbuffer=array.array('Q', [0,]*100)):
         """ Add all ngrams/kmers of length self.nsize found in the sequence "s".
 
-        - s: a bytes-like sequence than can be sliced, and the slices be consummed
-             by the function in the property `hashfun` (given to the constructor)
+        - seq: a bytes-like sequence than can be sliced, and the slices be consummed
+               by the function in the property `hashfun` (given to the constructor)
         - hashbuffer: a buffer array to store hash values during batch C calls
 
         """
@@ -138,8 +138,12 @@ class MaxHashNgramSketch(object):
         heapset = self._heapset
         maxsize = self._maxsize
         nsize = self._nsize
+        lseq = len(seq)
         w = len(hashbuffer)
         assert nsize <= w
+        #if w > lseq:
+        #    w = lseq
+        ew = w-nsize+1
         anynew = self._anynew
         i = None
         lheap = len(heap)
@@ -147,14 +151,23 @@ class MaxHashNgramSketch(object):
             heaptop = heap[0][0]
         else:
             heaptop = None
-            
-        for i in range(0, len(s)-nsize+1, w):
-            subs = s[i:(i+w)]
+
+        nchunks = (lseq // ew)
+        
+        leftover = (max(0, nchunks-1)*ew + w) - lseq
+
+        if leftover >= nsize:
+            nchunks += 1
+        
+        for w_i in range(nchunks):
+            slice_beg = (w_i*ew)
+            slice_end = slice_beg + w
+            subs = seq[slice_beg:slice_end] # safe: no out-of-bound in Python
             nsubs = hashfun(subs, nsize, hashbuffer)
             for j in range(nsubs):
                 h = hashbuffer[j]
                 if lheap < maxsize:
-                    ngram = s[(i+j):(i+j+nsize)]
+                    ngram = subs[j:(j+nsize)]
                     elt = self._make_elt(h, ngram)
                     if elt not in heapset:
                         self._add(elt)
@@ -163,14 +176,15 @@ class MaxHashNgramSketch(object):
                     if anynew is not None:
                         anynew(elt)
                 elif h  >= heaptop:
-                    ngram = s[(i+j):(i+j+nsize)]
+                    ngram = subs[j:(j+nsize)]
                     elt = self._make_elt(h, ngram)
                     if elt not in heapset:
-                        out = self._replace((h, ngram))
+                        out = self._replace(elt)
                         heaptop = heap[0][0]
                     if anynew is not None:
                         anynew(elt)
             self._nvisited += nsubs
+                            
 
     def update(self, obj):
         """

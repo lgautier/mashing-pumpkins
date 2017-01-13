@@ -6,15 +6,10 @@ from collections import Counter
 from mashingpumpkins._murmurhash3 import hasharray
 from mashingpumpkins.minhashsketch import (MaxHashNgramSketch, MaxHashNgramCountSketch, FrozenHashNgramSketch)
 
-def test_MaxHashNgramSketch():
 
-    # random (DNA) sequence
-    random.seed(123)
-    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
-
+def _test_MaxHashNgramSketch(sequence, nsize):
     # set the hashing function, size of ngrams, max size for the minhash sketch
     hashfun = hasharray
-    nsize = 21
     maxsize = 10
     
     mhs = MaxHashNgramSketch(nsize, maxsize, hashfun)
@@ -25,7 +20,7 @@ def test_MaxHashNgramSketch():
     mhs.add(sequence)
 
     # check that all ngrams/kmers visited when adding sequence
-    assert mhs.nvisited == (50-nsize+1)
+    assert mhs.nvisited == (len(sequence)-nsize+1)
     # check that the minhash sketch is full
     assert len(mhs) == maxsize
     assert len(mhs._heap) == maxsize
@@ -50,11 +45,27 @@ def test_MaxHashNgramSketch():
     #FIXME: add test for .update
 
 
-def test_MaxHashNgramSketch_add_hashvalue():
+def test_MaxHashNgramSketch_longer_than_buffer():
+    # random (DNA) sequence
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
+    nsize = 21
+    _test_MaxHashNgramSketch(sequence, nsize)
 
+def test_MaxHashNgramSketch_shorter_than_buffer():
+    # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
-    
+    nsize = 21
+    _test_MaxHashNgramSketch(sequence, nsize)
+
+def test_MaxHashNgramSketch_add_hashvalue():
+    # random (DNA) sequence
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
+    nsize = 21
+    _test_MaxHashNgramSketch(sequence, nsize)
+
     hashfun = hasharray
     nsize = 21
     maxsize = 10
