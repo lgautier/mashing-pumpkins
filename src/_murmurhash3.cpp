@@ -54,7 +54,7 @@ hasharray(PyObject * self, PyObject * args)
   
   if (width > length) {
     PyBuffer_Release(&inputbuf);
-    PyErr_SetString(PyExc_ValueError, "The width cannot be longer than the input string.");
+    PyErr_SetString(PyExc_ValueError, "The width of the window cannot be longer than the input string.");
     return NULL;
   }
     
