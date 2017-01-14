@@ -1,5 +1,5 @@
 from heapq import heappush, heapreplace
-from collections import Counter, namedtuple
+from collections import Counter
 import array
 
 class MaxHashNgramSketch(object):
@@ -56,14 +56,14 @@ class MaxHashNgramSketch(object):
         Note: This method does not check whether the element is satisfying
         the MaxHash property,        
         """
-        self._heapset.add(elt)
+        self._heapset.add(self._extracthash(elt))
         heappush(self._heap, elt)
 
-    def _replace(self, elt):
+    def _replace(self, h, elt):
         heapset = self._heapset
-        heapset.add(elt)
+        heapset.add(h)
         out = heapreplace(self._heap, elt)
-        heapset.remove(out)
+        heapset.remove(self._extracthash(out))
         return out
 
     @staticmethod
@@ -116,17 +116,17 @@ class MaxHashNgramSketch(object):
         ngram = None
         for h in values:
             if lheap < maxsize:
-                elt = make_elt(h, ngram)
-                if elt not in heapset:
+                if h not in heapset:
+                    elt = make_elt(h, ngram)
                     self._add(elt)
                     heaptop = extracthash(heap[0])
                     lheap += 1
                 if anynew is not None:
                     anynew(elt)
             if h  >= heaptop:
-                elt = make_elt(h, ngram)
-                if elt not in heapset:
-                    out = self._replace(elt)
+                if h not in heapset:
+                    elt = make_elt(h, ngram)
+                    out = self._replace(h, elt)
                     heaptop = extracthash(heap[0])
                 if anynew is not None:
                     anynew(elt)
@@ -157,7 +157,7 @@ class MaxHashNgramSketch(object):
         if lheap > 0:
             heaptop = extracthash(heap[0])
         else:
-            heaptop = None
+            heaptop = 0
 
         nchunks = (lseq // ew)
         
@@ -175,21 +175,21 @@ class MaxHashNgramSketch(object):
                 h = hashbuffer[j]
                 if lheap < maxsize:
                     ngram = subs[j:(j+nsize)]
-                    elt = make_elt(h, ngram)
-                    if elt not in heapset:
+                    if h not in heapset:
+                        elt = make_elt(h, ngram)
                         self._add(elt)
                         heaptop = extracthash(heap[0])
                         lheap += 1
                     if anynew is not None:
-                        anynew(elt)
+                        anynew(h)
                 elif h  >= heaptop:
                     ngram = subs[j:(j+nsize)]
-                    elt = make_elt(h, ngram)
-                    if elt not in heapset:
-                        out = self._replace(elt)
+                    if h not in heapset:
+                        elt = make_elt(h, ngram)
+                        out = self._replace(h, elt)
                         heaptop = extracthash(heap[0])
                     if anynew is not None:
-                        anynew(elt)
+                        anynew(h)
             self._nvisited += nsubs
                             
 
@@ -235,7 +235,7 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
                     if elt in count:
                         raise ValueError('Elements in the heap must be unique.')
                     else:
-                        count[elt] = 1
+                        count[self._extracthash(elt)] = 1
         else:
             if len(self._heapset ^ set(count.keys())) > 0:
                 raise ValueError("Mismatching keys with the parameter 'count'.")
@@ -244,16 +244,13 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
     def _add(self, elt):
         super()._add(elt)
 
-    def _replace(self, elt):
-        out = super()._replace(elt)
-        del(self._count[out])
+    def _replace(self, h, elt):
+        out = super()._replace(h, elt)
+        del(self._count[self._extracthash(out)])
         return out
 
-    def __contains__(self, elt):
-        return elt in self._heapcount
-
-    def _anynew(self, elt):
-        self._count[elt] += 1
+    def _anynew(self, h):
+        self._count[h] += 1
 
     
 class FrozenHashNgramSketch(object):

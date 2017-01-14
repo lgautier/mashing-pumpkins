@@ -38,7 +38,7 @@ def _test_MaxHashNgramSketch(sequence, nsize):
         allhash.append((hbuffer[0], ngram))
     # slice the 10 biggest out
     allhash.sort(reverse=True)
-    maxhash = set(allhash[:maxsize])
+    maxhash = set(mhs._extracthash(x) for x in allhash[:maxsize])
 
     # check that the slice above matches the content of the maxhash sketch
     assert len(maxhash ^ mhs._heapset) == 0
@@ -113,12 +113,12 @@ def test_MaxHashNgramCountSketch():
     for i in range(0, len(sequence)-nsize+1):
         ngram = sequence[i:(i+nsize)]
         hashfun(ngram, nsize, hbuffer)
-        allcounthash[(hbuffer[0], ngram)] += 1
+        allcounthash[hbuffer[0]] += 1
     maxhash = sorted(allcounthash.keys(), reverse=True)[:maxsize]
     assert len(set(maxhash) ^ mhs._heapset) == 0
 
-    for elt, value in mhs._count.items():
-        assert allcounthash[elt] == value
+    for h, value in mhs._count.items():
+        assert allcounthash[h] == value
 
     #FIXME: look the tests below
     #assert len(mhs) == maxsize
