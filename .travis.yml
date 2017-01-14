@@ -13,4 +13,3 @@ install:
 # command to run tests
 script:
   - coverage run -m pytest --cov=mashingpumpkins src/
-  - coverage combine
