@@ -154,9 +154,11 @@ def test_FrozenHashNgramSketch():
     sketch = set((1,2,3,6,7))
     mhs_b = FrozenHashNgramSketch(sketch, nsize, maxsize = maxsize, nvisited=len(sketch))
     assert mhs.jaccard(mhs_b) == 3/7
-
+    
+    # invalid maxsize
     with pytest.raises(ValueError):
         mhs = FrozenHashNgramSketch(sketch, nsize, maxsize = len(sketch)-1)
 
+    # invalid nvisited
     with pytest.raises(ValueError):
         mhs = FrozenHashNgramSketch(sketch, nsize, nvisited = len(sketch)-1)
