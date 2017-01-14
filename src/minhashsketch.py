@@ -2,8 +2,6 @@ from heapq import heappush, heapreplace
 from collections import Counter, namedtuple
 import array
 
-Element = namedtuple('Element', 'hash ngram')
-
 class MaxHashNgramSketch(object):
     
     """
@@ -76,11 +74,11 @@ class MaxHashNgramSketch(object):
         - h: an hash value
         - ngram: the object (ngram/kmer) at the source of the hash value
         """
-        return Element(h, ngram)
+        return (h, ngram)
 
     @staticmethod
     def _extracthash(heaptop):
-        return heaptop.hash
+        return heaptop[0]
         
     def __len__(self):
         """
