@@ -5,34 +5,7 @@ uint32_t MINHASH_DEFAULT_SEED = 0;
 
 #include <stdio.h>
 
-PyDoc_STRVAR(hash_from_memoryview_doc,
-             "hash_from_memoryview(memoryview [, seed]) -> int\n\n"
-             "Compute a hash for the array of bytes contained in a memoryview, "
-	     "optionally using a seed (an integer). ");
-
-static PyObject *
-hash_from_memoryview(PyObject * self, PyObject * args)
-{
-  PyObject * memoryview;
-  const uint32_t seed = MINHASH_DEFAULT_SEED;
-  if (!PyArg_ParseTuple(args, "O!|I", &PyMemoryView_Type, &memoryview, &seed)) {
-    return NULL;
-  }
-
-  Py_buffer * pybuf = PyMemoryView_GET_BUFFER(memoryview);
-
-  const char * ngram = (char *)pybuf->buf;
-  const Py_ssize_t length = pybuf->len;
-  
-  uint64_t out[2] = {0, 0};
-  MurmurHash3_x64_128((void *)ngram,
-		      (uint32_t)length,
-		      seed,
-		      &out);
-  return PyLong_FromUnsignedLongLong(out[0]);
-}
-
-PyDoc_STRVAR(hasharray_from_memoryview_doc,
+PyDoc_STRVAR(hasharray_doc,
              "hasharray(input, width, buffer [, seed]) -> int\n\n"
              "Compute a hash values for a sliding array of bytes over a bytes-like object 'input', "
 	     "optionally using a seed (an integer).");
@@ -84,12 +57,8 @@ hasharray(PyObject * self, PyObject * args)
 
 static PyMethodDef murmurhash3ModuleMethods[] = {
     {
-      "hash_from_memoryview", (PyCFunction)hash_from_memoryview,
-        METH_VARARGS, hash_from_memoryview_doc,
-    },
-    {
       "hasharray", (PyCFunction)hasharray,
-        METH_VARARGS, hasharray_from_memoryview_doc,
+        METH_VARARGS, hasharray_doc,
     },
     { NULL} // sentinel
 };

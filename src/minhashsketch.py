@@ -141,8 +141,6 @@ class MaxHashNgramSketch(object):
         lseq = len(seq)
         w = len(hashbuffer)
         assert nsize <= w
-        #if w > lseq:
-        #    w = lseq
         ew = w-nsize+1
         anynew = self._anynew
         i = None
