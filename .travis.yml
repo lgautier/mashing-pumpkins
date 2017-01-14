@@ -6,12 +6,11 @@ python:
 
 # command to install dependencies
 install:
+  - pip install coverage
   - pip install pytest-cov
   - pip install .
-  
+    
 # command to run tests
 script:
-  - python -m pytest --cov=mashingpumpkins src/
-
-after_success:
-  - codecov
+  - coverage run -m pytest --pdb --cov=mashingpumpkins src/
+  - coverage combine
