@@ -41,7 +41,6 @@ def _test_MaxHashNgramSketch(sequence, nsize):
     # check that the slice above matches the content of the maxhash sketch
     assert len(maxhash ^ mhs._heapset) == 0
     
-    #FIXME: add test for .add_hashvalues
     #FIXME: add test for .update
 
 
@@ -59,7 +58,7 @@ def test_MaxHashNgramSketch_shorter_than_buffer():
     nsize = 21
     _test_MaxHashNgramSketch(sequence, nsize)
 
-def test_MaxHashNgramSketch_add_hashvalue():
+def test_MaxHashNgramSketch_add_hashvalues():
     # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
@@ -89,7 +88,6 @@ def test_MaxHashNgramSketch_add_hashvalue():
     
     assert len(set(x[0] for x in mhs_a) ^ set(x[0] for x in mhs_b)) == 0
     
-    #FIXME: add test for .add_hashvalues
     #FIXME: add test for .update
 
     
