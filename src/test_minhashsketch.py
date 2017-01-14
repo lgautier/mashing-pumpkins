@@ -4,7 +4,9 @@ import random
 import array
 from collections import Counter
 from mashingpumpkins._murmurhash3 import hasharray
-from mashingpumpkins.minhashsketch import (MaxHashNgramSketch, MaxHashNgramCountSketch, FrozenHashNgramSketch)
+from mashingpumpkins.minhashsketch import (MaxHashNgramSketch,
+                                           MaxHashNgramCountSketch,
+                                           FrozenHashNgramSketch)
 
 
 def _test_MaxHashNgramSketch(sequence, nsize):
