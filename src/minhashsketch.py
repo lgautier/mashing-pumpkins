@@ -128,7 +128,7 @@ class MaxHashNgramSketch(object):
             if h  >= heaptop:
                 elt = make_elt(h, ngram)
                 if elt not in heapset:
-                    out = self._replace((h, ngram))
+                    out = self._replace(elt)
                     heaptop = extracthash(heap[0])
                 if anynew is not None:
                     anynew(elt)
