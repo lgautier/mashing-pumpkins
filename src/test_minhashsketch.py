@@ -9,10 +9,9 @@ from mashingpumpkins.minhashsketch import (MaxHashNgramSketch,
                                            FrozenHashNgramSketch)
 
 
-def _test_MaxHashNgramSketch(sequence, nsize):
+def _test_MaxHashNgramSketch(sequence, nsize, maxsize):
     # set the hashing function, size of ngrams, max size for the minhash sketch
     hashfun = hasharray
-    maxsize = 10
     
     mhs = MaxHashNgramSketch(nsize, maxsize, hashfun)
     assert mhs.maxsize == maxsize
@@ -23,11 +22,13 @@ def _test_MaxHashNgramSketch(sequence, nsize):
 
     # check that all ngrams/kmers visited when adding sequence
     assert mhs.nvisited == (len(sequence)-nsize+1)
-    # check that the minhash sketch is full
-    assert len(mhs) == maxsize
-    assert len(mhs._heap) == maxsize
-    assert len(mhs._heapset) == maxsize
-    assert len(tuple(mhs)) == maxsize
+
+    if maxsize < mhs.nvisited:
+        # check that the minhash sketch is full
+        assert len(mhs) == maxsize
+        assert len(mhs._heap) == maxsize
+        assert len(mhs._heapset) == maxsize
+        assert len(tuple(mhs)) == maxsize
 
     # extract all ngrams/kmers of length nsize in the test sequence
     allhash = list()
@@ -49,12 +50,19 @@ def test_MaxHashNgramSketch_longer_than_buffer():
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
     nsize = 21
-    _test_MaxHashNgramSketch(sequence, nsize)
-    # random (DNA) sequence
+    maxsize = 10
+    _test_MaxHashNgramSketch(sequence, nsize, maxsize)
+
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(125))
     nsize = 21
-    _test_MaxHashNgramSketch(sequence, nsize)
+    maxsize = 10
+    _test_MaxHashNgramSketch(sequence, nsize, maxsize)
+
+    # test with maxsize >> len(sequence)
+    nsize = 21
+    maxsize = 200
+    _test_MaxHashNgramSketch(sequence, nsize, maxsize)
 
 
 def test_MaxHashNgramSketch_shorter_than_buffer():
@@ -62,15 +70,12 @@ def test_MaxHashNgramSketch_shorter_than_buffer():
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
     nsize = 21
-    _test_MaxHashNgramSketch(sequence, nsize)
+    maxsize = 10
+    _test_MaxHashNgramSketch(sequence, nsize, maxsize)
 
-def test_MaxHashNgramSketch_update():
-    # random (DNA) sequence
-    random.seed(123)
-    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(710))
+def _test_MaxHashNgramSketch_update(sequence, maxsize):
     # set the hashing function, size of ngrams, max size for the minhash sketch
     hashfun = hasharray
-    maxsize = 10
     nsize = 21
     mhs = MaxHashNgramSketch(nsize, maxsize, hashfun)
     mhs.add(sequence)
@@ -93,6 +98,17 @@ def test_MaxHashNgramSketch_update():
     assert len(tuple(mhs_a)) == len(tuple(mhs_a))
 
     assert len(mhs_a._heapset ^ mhs._heapset) == 0
+
+def test_MaxHashNgramSketch_update():
+    # random (DNA) sequence
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
+    maxsize = 10
+    _test_MaxHashNgramSketch_update(sequence, maxsize)
+
+    maxsize = 150
+    _test_MaxHashNgramSketch_update(sequence, maxsize)
+
 
 def test_MaxHashNgramSketch_add_hashvalues():
     # random (DNA) sequence
