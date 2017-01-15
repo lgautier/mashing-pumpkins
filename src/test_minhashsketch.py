@@ -45,6 +45,24 @@ def _test_MaxHashNgramSketch(sequence, nsize, maxsize):
     assert len(maxhash ^ mhs._heapset) == 0
 
 
+def test_MaxHashNgramSketch():
+    nsize = 3
+    maxsize = 10
+    hashfun = hasharray
+
+    mhs = MaxHashNgramSketch(nsize, maxsize, hashfun, heap=list())
+    assert len(mhs) == 0
+    sequence = b'AAABBBCCC'
+    mhs.add(sequence)
+    hashbuffer = array.array('Q', [0,])
+    hashfun(b'BBB', nsize, hashbuffer)
+    assert hashbuffer[0] in mhs
+    assert 123 not in mhs
+    
+    # with heap
+    mhs = MaxHashNgramSketch(nsize, maxsize, hashfun, heap=list())
+    assert len(mhs) == 0
+    
 def test_MaxHashNgramSketch_longer_than_buffer():
     # random (DNA) sequence
     random.seed(123)
