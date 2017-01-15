@@ -42,8 +42,6 @@ def _test_MaxHashNgramSketch(sequence, nsize):
 
     # check that the slice above matches the content of the maxhash sketch
     assert len(maxhash ^ mhs._heapset) == 0
-    
-    #FIXME: add test for .update
 
 
 def test_MaxHashNgramSketch_longer_than_buffer():
@@ -52,6 +50,12 @@ def test_MaxHashNgramSketch_longer_than_buffer():
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
     nsize = 21
     _test_MaxHashNgramSketch(sequence, nsize)
+    # random (DNA) sequence
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(125))
+    nsize = 21
+    _test_MaxHashNgramSketch(sequence, nsize)
+
 
 def test_MaxHashNgramSketch_shorter_than_buffer():
     # random (DNA) sequence
@@ -60,12 +64,40 @@ def test_MaxHashNgramSketch_shorter_than_buffer():
     nsize = 21
     _test_MaxHashNgramSketch(sequence, nsize)
 
+def test_MaxHashNgramSketch_update():
+    # random (DNA) sequence
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(710))
+    # set the hashing function, size of ngrams, max size for the minhash sketch
+    hashfun = hasharray
+    maxsize = 10
+    nsize = 21
+    mhs = MaxHashNgramSketch(nsize, maxsize, hashfun)
+    mhs.add(sequence)
+
+    mhs_a = MaxHashNgramSketch(nsize, maxsize, hashfun)
+    seq_a = sequence[:(len(sequence)//2)]
+    mhs_a.add(seq_a)
+    assert mhs_a.nvisited == (len(seq_a)-nsize+1)
+    mhs_b = MaxHashNgramSketch(nsize, maxsize, hashfun)
+    seq_b = sequence[(len(sequence)//2-nsize+1):]
+    mhs_b.add(seq_b)
+    assert mhs_b.nvisited == (len(seq_b)-nsize+1)
+
+    mhs_a.update(mhs_b)
+
+    assert mhs_a.nvisited == mhs.nvisited
+    assert len(mhs_a) == len(mhs)
+    assert len(mhs_a._heap) == len(mhs._heap)
+    assert len(mhs_a._heapset) == len(mhs._heapset)
+    assert len(tuple(mhs_a)) == len(tuple(mhs_a))
+
+    assert len(mhs_a._heapset ^ mhs._heapset) == 0
+
 def test_MaxHashNgramSketch_add_hashvalues():
     # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
-    nsize = 21
-    _test_MaxHashNgramSketch(sequence, nsize)
 
     hashfun = hasharray
     nsize = 21
