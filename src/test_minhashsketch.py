@@ -158,8 +158,32 @@ def test_MaxHashNgramSketch_add_hashvalues():
     
     #FIXME: add test for .update
 
-    
+
+
 def test_MaxHashNgramCountSketch():
+
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
+    hashfun = hasharray
+
+    nsize = 2
+    maxsize = 10
+    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun)
+    assert mhs.maxsize == maxsize
+    assert mhs.nsize == nsize
+
+    nsize = 2
+    maxsize = 10
+    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, count=Counter())
+    assert mhs.maxsize == maxsize
+    assert mhs.nsize == nsize
+
+    # invalid count
+    with pytest.raises(ValueError):
+        mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, count=Counter([(213, 'AA')]))
+
+    
+def test_MaxHashNgramCountSketch_add():
 
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
@@ -171,6 +195,7 @@ def test_MaxHashNgramCountSketch():
     mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun)
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
+    
     mhs.add(sequence)
     assert mhs.nvisited == (50-nsize+1)
 
