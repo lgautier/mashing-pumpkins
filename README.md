@@ -5,7 +5,8 @@ minhashing-related miscellanea
 [![Build Status](https://travis-ci.org/lgautier/mashing-pumpkins.svg?branch=master)](https://travis-ci.org/lgautier/mashing-pumpkins)
 [![codecov](https://codecov.io/gh/lgautier/mashing-pumpkins/branch/master/graph/badge.svg)](https://codecov.io/gh/lgautier/mashing-pumpkins)
 
-Not much to read about it beside the notebooks in the [doc/](doc/) and docstrings in the code.
+Most of the documentation is currently in docstrings (most, if not all, functions, classes an methods are documented), and in
+a notebooks in the [doc/](doc/) demonstrating the usage.
 
 [MASH](https://github.com/marbl/Mash) and [sourmash](https://github.com/dib-lab/sourmash) started it all. They have good documentation. Check them out !
 
