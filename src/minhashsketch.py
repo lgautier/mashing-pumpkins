@@ -169,6 +169,11 @@ class MaxHashNgramSketch(object):
     def _add(self, subs, nsubs, hashbuffer, heaptop,
              extracthash, make_elt, replace, anynew) -> int:
         """
+        Process/add elements to the sketch.
+
+        If calling this method directly, updating the attribute
+        `nvisited` is under your responsibility.
+
         - subs: (sub-)sequence
         - nsubs: number of hash values in the hashbuffer
         - hashbuffer: buffer with hash values
@@ -307,10 +312,11 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
             count = Counter()
             if heap is not None:
                 for elt in heap:
-                    if elt in count:
+                    h = self._extracthash(elt)
+                    if h in count:
                         raise ValueError('Elements in the heap must be unique.')
                     else:
-                        count[self._extracthash(elt)] = 1
+                        count[h] = 1
         else:
             if len(self._heapset ^ set(count.keys())) > 0:
                 raise ValueError("Mismatching keys with the parameter 'count'.")
@@ -329,6 +335,9 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
 
     
 class FrozenHashNgramSketch(object):
+    """
+    Read-only sketch.
+    """
 
     def __init__(self, sketch : set, nsize : int, maxsize : int = None, nvisited: int = None):
         """

@@ -128,24 +128,33 @@ def test_MaxHashNgramSketch_update():
     _test_MaxHashNgramSketch_update(sequence, maxsize)
 
 
-def test_MaxHashNgramSketch_add_hashvalues():
+def _test_MaxHashNgramSketch_add_hashvalues(nsize, maxsize, hashfun):
     # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
-
-    hashfun = hasharray
-    nsize = 21
-    maxsize = 10
+    hbuffer = array.array('Q', [0, ])
+    
     mhs_a = MaxHashNgramSketch(nsize, maxsize, hashfun)
     mhs_a.add(sequence)
 
-    mhs_b = MaxHashNgramSketch(nsize, maxsize, hashfun)
-    hbuffer = array.array('Q', [0, ])
     seq_hash = list()
     for i in range(0, len(sequence)-nsize):
         ngram = sequence[i:(i+nsize)]
         hashfun(ngram, nsize, hbuffer)
-        seq_hash.append((ngram, hbuffer[0]))    
+        seq_hash.append((ngram, hbuffer[0]))
+
+    return (sequence, seq_hash, mhs_a)
+
+
+def test_MaxHashNgramSketch_add_hashvalues():
+
+    nsize = 21
+    maxsize=10
+    hashfun = hasharray
+    sequence, seq_hash, mhs_a = _test_MaxHashNgramSketch_add_hashvalues(nsize, maxsize, hashfun)
+    mhs_b = MaxHashNgramSketch(nsize, maxsize, hashfun)
+    hbuffer = array.array('Q', [0, ])
+
     mhs_b.add_hashvalues(x[1] for x in seq_hash)
 
     assert mhs_b.nvisited == 0 # !!! nvisited it not updated
@@ -155,8 +164,36 @@ def test_MaxHashNgramSketch_add_hashvalues():
     assert len(tuple(mhs_b)) == maxsize
     
     assert len(set(x[0] for x in mhs_a) ^ set(x[0] for x in mhs_b)) == 0
+
+
+def test_MaxHashNgramSketch_add_hashvalues_2calls():
+
+    nsize = 21
+    maxsize=10
+    hashfun = hasharray
+    sequence, seq_hash, mhs_a = _test_MaxHashNgramSketch_add_hashvalues(nsize, maxsize, hashfun)
+    mhs_b = MaxHashNgramSketch(nsize, maxsize, hashfun)
+    hbuffer = array.array('Q', [0, ])
+
+    mhs_b = MaxHashNgramSketch(nsize, maxsize, hashfun)
+    hbuffer = array.array('Q', [0, ])
+    i = 3
+    mhs_b.add_hashvalues(x[1] for x in seq_hash[:i])
+    assert len(mhs_b) < maxsize
+    assert len(mhs_b._heap) < maxsize
+    assert len(mhs_b._heapset) < maxsize
+    assert len(tuple(mhs_b)) < maxsize
+
+    mhs_b.add_hashvalues(x[1] for x in seq_hash[i:])
+
+    assert mhs_b.nvisited == 0 # !!! nvisited it not updated
+    assert len(mhs_b) == maxsize
+    assert len(mhs_b._heap) == maxsize
+    assert len(mhs_b._heapset) == maxsize
+    assert len(tuple(mhs_b)) == maxsize
     
-    #FIXME: add test for .update
+    assert len(set(x[0] for x in mhs_a) ^ set(x[0] for x in mhs_b)) == 0
+
 
 
 
@@ -181,6 +218,15 @@ def test_MaxHashNgramCountSketch():
     # invalid count
     with pytest.raises(ValueError):
         mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, count=Counter([(213, 'AA')]))
+
+    # valid heap
+    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, heap=[])
+    assert mhs.maxsize == maxsize
+    assert mhs.nsize == nsize
+    
+    # invalid heap
+    with pytest.raises(ValueError):
+        mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, heap=[(1, 'A'),(1, 'B')])
 
     
 def test_MaxHashNgramCountSketch_add():
