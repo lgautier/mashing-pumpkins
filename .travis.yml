@@ -6,11 +6,10 @@ python:
 
 # command to install dependencies
 install:
-  - pip install coverage
   - pip install pytest-cov
   - pip install .
     
 # command to run tests
 script:
-  - coverage run -m pytest --cov=mashingpumpkins --cov-report xml src/
+  - python -m pytest --cov=mashingpumpkins --cov-report xml src/
   - bash <(curl -s https://codecov.io/bash)
