@@ -4,7 +4,7 @@ import array
 
 
 
-def chunkpos_iter(nsize, lseq, w):
+def chunkpos_iter(nsize: int, lseq: int, w: int) -> (int, int):
     """
     Iterator of chunk indices.
 
@@ -88,6 +88,12 @@ class MaxHashNgramSketch(object):
         heappush(self._heap, elt)
 
     def _replace(self, h, elt):
+        """
+        insert/replace an element
+
+        - h: a hash value
+        - elt: an object as returned by the method `make_elt()` 
+        """
         heapset = self._heapset
         heapset.add(h)
         out = heapreplace(self._heap, elt)
@@ -99,7 +105,7 @@ class MaxHashNgramSketch(object):
         """
         Make an element to store into the sketch
         
-        - h: an hash value
+        - h: a hash value
         - ngram: the object (ngram/kmer) at the source of the hash value
         """
         return (h, ngram)
@@ -160,10 +166,23 @@ class MaxHashNgramSketch(object):
                     anynew(elt)
 
 
-    def _add(self, subs, nsubs, hashbuffer, nsize, heap, heaptop, heapset, extracthash, anynew):
+    def _add(self, subs, nsubs, hashbuffer, heaptop):
+        """
+        - subs: (sub-)sequence
+        - nsubs: number of hash values in the hashbuffer
+        - hashbuffer: buffer with hash values
+        - heaptop: top of the heap
+        """
+
+        nsize = self._nsize
+        heap = self._heap
         lheap = len(heap)
+        heapset = self._heapset
         make_elt = self._make_elt
         maxsize = self._maxsize
+        anynew = self._anynew
+        extracthash = self._extracthash
+        
         for j in range(nsubs):
             h = hashbuffer[j]
             if lheap < maxsize:
@@ -183,10 +202,10 @@ class MaxHashNgramSketch(object):
                     heaptop = extracthash(heap[0])
                 if anynew is not None:
                     anynew(h)
-        return lheap, heaptop
+        return heaptop
         
     def add(self, seq, hashbuffer=array.array('Q', [0,]*100)):
-        """ Add all ngrams/kmers of length self.nsize found in the sequence "s".
+        """ Add all sub-sequences of length `self.nsize` found in the sequence "seq".
 
         - seq: a bytes-like sequence than can be sliced, and the slices be consummed
                by the function in the property `hashfun` (given to the constructor)
@@ -195,7 +214,6 @@ class MaxHashNgramSketch(object):
         """
         hashfun = self._hashfun
         heap = self._heap
-        heapset = self._heapset
         maxsize = self._maxsize
         nsize = self._nsize
         lseq = len(seq)
@@ -216,8 +234,7 @@ class MaxHashNgramSketch(object):
         for slice_beg, slice_end in chunkpos_iter(nsize, lseq, w):
             subs = seq[slice_beg:slice_end] # safe: no out-of-bound in Python
             nsubs = hashfun(subs, nsize, hashbuffer)
-            lheap = self._add(subs, nsubs, hashbuffer, nsize, heap, heaptop, heapset, extracthash, anynew)
-            heaptop = extracthash(heap[0])
+            heaptop = self._add(subs, nsubs, hashbuffer, heaptop)
             self._nvisited += nsubs
                             
 
@@ -266,7 +283,7 @@ class MaxHashNgramSketch(object):
 
 class MaxHashNgramCountSketch(MaxHashNgramSketch):
     """
-    MaxHash Sketch where the number of times an hash value occurs is stored
+    MaxHash Sketch where the number of times an hash value was found is stored
     """
 
     def __init__(self, nsize: int, maxsize: int, hashfun,
