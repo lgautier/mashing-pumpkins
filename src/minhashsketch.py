@@ -186,8 +186,8 @@ class MaxHashNgramSketch(object):
         for j in range(nsubs):
             h = hashbuffer[j]
             if lheap < maxsize:
-                ngram = subs[j:(j+nsize)]
                 if h not in heapset:
+                    ngram = subs[j:(j+nsize)]
                     elt = make_elt(h, ngram)
                     self._add_elt_unsafe(elt)
                     heaptop = extracthash(heap[0])
@@ -195,8 +195,8 @@ class MaxHashNgramSketch(object):
                 if anynew is not None:
                     anynew(h)
             elif h  >= heaptop:
-                ngram = subs[j:(j+nsize)]
                 if h not in heapset:
+                    ngram = subs[j:(j+nsize)]
                     elt = make_elt(h, ngram)
                     out = self._replace(h, elt)
                     heaptop = extracthash(heap[0])
