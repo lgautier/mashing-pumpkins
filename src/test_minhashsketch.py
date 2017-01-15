@@ -228,6 +228,12 @@ def test_MaxHashNgramCountSketch():
     with pytest.raises(ValueError):
         mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, heap=[(1, 'A'),(1, 'B')])
 
+    # invalid count/heap combo
+    with pytest.raises(ValueError):
+        mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun,
+                                      heap=[(1, 'A'),(1, 'B')],
+                                      count=Counter([(213, 'AA')]))
+
     
 def test_MaxHashNgramCountSketch_add():
 
