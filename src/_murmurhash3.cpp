@@ -80,6 +80,8 @@ PyInit__murmurhash3(void)
     if (m == NULL) {
         return NULL;
     }
+
+    PyModule_AddIntConstant(m, "DEFAULT_SEED", MINHASH_DEFAULT_SEED);
     
     return m;
 }
