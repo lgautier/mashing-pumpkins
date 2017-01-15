@@ -166,22 +166,24 @@ class MaxHashNgramSketch(object):
                     anynew(elt)
 
 
-    def _add(self, subs, nsubs, hashbuffer, heaptop):
+    def _add(self, subs, nsubs, hashbuffer, heaptop,
+             extracthash, make_elt, replace, anynew) -> int:
         """
         - subs: (sub-)sequence
         - nsubs: number of hash values in the hashbuffer
         - hashbuffer: buffer with hash values
         - heaptop: top of the heap
+        - extracthash:
+        - make_elt:
+        - replace:
+        - anynew:
         """
 
         nsize = self._nsize
         heap = self._heap
         lheap = len(heap)
         heapset = self._heapset
-        make_elt = self._make_elt
         maxsize = self._maxsize
-        anynew = self._anynew
-        extracthash = self._extracthash
         
         for j in range(nsubs):
             h = hashbuffer[j]
@@ -198,7 +200,7 @@ class MaxHashNgramSketch(object):
                 if h not in heapset:
                     ngram = subs[j:(j+nsize)]
                     elt = make_elt(h, ngram)
-                    out = self._replace(h, elt)
+                    out = replace(h, elt)
                     heaptop = extracthash(heap[0])
                 if anynew is not None:
                     anynew(h)
@@ -234,7 +236,8 @@ class MaxHashNgramSketch(object):
         for slice_beg, slice_end in chunkpos_iter(nsize, lseq, w):
             subs = seq[slice_beg:slice_end] # safe: no out-of-bound in Python
             nsubs = hashfun(subs, nsize, hashbuffer)
-            heaptop = self._add(subs, nsubs, hashbuffer, heaptop)
+            heaptop = self._add(subs, nsubs, hashbuffer, heaptop,
+                                extracthash, make_elt, self._replace, anynew)
             self._nvisited += nsubs
                             
 
