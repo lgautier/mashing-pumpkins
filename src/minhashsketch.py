@@ -211,7 +211,7 @@ class MaxHashNgramSketch(object):
                     anynew(h)
         return heaptop
         
-    def add(self, seq, hashbuffer=array.array('Q', [0,]*100)):
+    def add(self, seq, hashbuffer=array.array('Q', [0,]*250)):
         """ Add all sub-sequences of length `self.nsize` found in the sequence "seq".
 
         - seq: a bytes-like sequence than can be sliced, and the slices be consummed
