@@ -2,6 +2,34 @@ from heapq import heappush, heapreplace
 from collections import Counter
 import array
 
+
+
+def chunkpos_iter(nsize, lseq, w):
+    """
+    Iterator of chunk indices.
+
+    - nsize: n in ngram
+    - lseq: length of sequence to chunk
+    - w: width of buffer
+
+    """
+    
+    assert nsize <= w
+    ew = w-nsize+1
+    
+    nchunks = (lseq // ew)
+
+    leftover = (max(0, nchunks-1)*ew + w) - lseq
+
+    if leftover >= nsize:
+        nchunks += 1
+
+    for w_i in range(nchunks):
+        slice_beg = (w_i*ew)
+        slice_end = slice_beg + w
+        yield (slice_beg, slice_end)
+
+
 class MaxHashNgramSketch(object):
     
     """
@@ -47,7 +75,7 @@ class MaxHashNgramSketch(object):
         """ Number of ngrams / kmers visited (considered for inclusion) so far. """
         return self._nvisited
 
-    def _add(self, elt):
+    def _add_elt(self, elt):
         """ 
         Add an element.
 
@@ -118,7 +146,7 @@ class MaxHashNgramSketch(object):
             if lheap < maxsize:
                 if h not in heapset:
                     elt = make_elt(h, ngram)
-                    self._add(elt)
+                    self._add_elt(elt)
                     heaptop = extracthash(heap[0])
                     lheap += 1
                 if anynew is not None:
@@ -131,6 +159,31 @@ class MaxHashNgramSketch(object):
                 if anynew is not None:
                     anynew(elt)
 
+
+    def _add(self, subs, nsubs, hashbuffer, nsize, heap, heaptop, heapset, extracthash, anynew):
+        lheap = len(heap)
+        make_elt = self._make_elt
+        maxsize = self._maxsize
+        for j in range(nsubs):
+            h = hashbuffer[j]
+            if lheap < maxsize:
+                ngram = subs[j:(j+nsize)]
+                if h not in heapset:
+                    elt = make_elt(h, ngram)
+                    self._add_elt(elt)
+                    heaptop = extracthash(heap[0])
+                    lheap += 1
+                if anynew is not None:
+                    anynew(h)
+            elif h  >= heaptop:
+                ngram = subs[j:(j+nsize)]
+                if h not in heapset:
+                    elt = make_elt(h, ngram)
+                    out = self._replace(h, elt)
+                    heaptop = extracthash(heap[0])
+                if anynew is not None:
+                    anynew(h)
+        return lheap, heaptop
         
     def add(self, seq, hashbuffer=array.array('Q', [0,]*100)):
         """ Add all ngrams/kmers of length self.nsize found in the sequence "s".
@@ -146,50 +199,25 @@ class MaxHashNgramSketch(object):
         maxsize = self._maxsize
         nsize = self._nsize
         lseq = len(seq)
+        
         w = len(hashbuffer)
         assert nsize <= w
-        ew = w-nsize+1
+
         anynew = self._anynew
         make_elt = self._make_elt
         extracthash = self._extracthash
-        i = None
+
         lheap = len(heap)
         if lheap > 0:
             heaptop = extracthash(heap[0])
         else:
             heaptop = 0
 
-        nchunks = (lseq // ew)
-        
-        leftover = (max(0, nchunks-1)*ew + w) - lseq
-
-        if leftover >= nsize:
-            nchunks += 1
-        
-        for w_i in range(nchunks):
-            slice_beg = (w_i*ew)
-            slice_end = slice_beg + w
+        for slice_beg, slice_end in chunkpos_iter(nsize, lseq, w):
             subs = seq[slice_beg:slice_end] # safe: no out-of-bound in Python
             nsubs = hashfun(subs, nsize, hashbuffer)
-            for j in range(nsubs):
-                h = hashbuffer[j]
-                if lheap < maxsize:
-                    ngram = subs[j:(j+nsize)]
-                    if h not in heapset:
-                        elt = make_elt(h, ngram)
-                        self._add(elt)
-                        heaptop = extracthash(heap[0])
-                        lheap += 1
-                    if anynew is not None:
-                        anynew(h)
-                elif h  >= heaptop:
-                    ngram = subs[j:(j+nsize)]
-                    if h not in heapset:
-                        elt = make_elt(h, ngram)
-                        out = self._replace(h, elt)
-                        heaptop = extracthash(heap[0])
-                    if anynew is not None:
-                        anynew(h)
+            lheap = self._add(subs, nsubs, hashbuffer, nsize, heap, heaptop, heapset, extracthash, anynew)
+            heaptop = extracthash(heap[0])
             self._nvisited += nsubs
                             
 
@@ -200,7 +228,7 @@ class MaxHashNgramSketch(object):
         - obj: an iterable of elements (each element as returned by `_make_elt()`
         """
         for x in obj:
-            self.add(x)
+            self._add_elt(x)
             
     def __iter__(self):
         """
@@ -241,8 +269,8 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
                 raise ValueError("Mismatching keys with the parameter 'count'.")
         self._count = count
 
-    def _add(self, elt):
-        super()._add(elt)
+    def _add_elt(self, elt):
+        super()._add_elt(elt)
 
     def _replace(self, h, elt):
         out = super()._replace(h, elt)
