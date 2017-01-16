@@ -1,7 +1,7 @@
 from heapq import heappush, heapreplace
 from collections import Counter
 import array
-from sequence import chunkpos_iter
+from mashingpumpkins.sequence import chunkpos_iter
 
 
 
