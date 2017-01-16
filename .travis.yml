@@ -6,11 +6,12 @@ python:
 
 # command to install dependencies
 install:
+  - pip install codecov
   - pip install pytest-cov
   - pip install .
     
 # command to run tests
 script:
   - python -m pytest --cov=mashingpumpkins.sequence --cov=mashingpumpkins --cov-report xml --cov-report term src/
-  - bash <(curl -s https://codecov.io/bash)
+  - codecov
   
