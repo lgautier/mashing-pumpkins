@@ -102,8 +102,14 @@ def _test_MaxHashNgramSketch_update(sequence, maxsize, methodname):
     mhs_a.add(seq_a)
     assert mhs_a.nvisited == (len(seq_a)-nsize+1)
 
-    # mismatching nsize
+    # mismatching objects
     mhs_c = MaxHashNgramSketch(nsize+1, maxsize, hashfun)
+    with pytest.raises(ValueError):
+        getattr(mhs_a, methodname)(mhs_c)
+    mhs_c = MaxHashNgramSketch(nsize, maxsize, lambda x: 0)
+    with pytest.raises(ValueError):
+        getattr(mhs_a, methodname)(mhs_c)
+    mhs_c = MaxHashNgramSketch(nsize+1, maxsize, lambda x: 0)
     with pytest.raises(ValueError):
         getattr(mhs_a, methodname)(mhs_c)
 

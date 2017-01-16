@@ -230,6 +230,9 @@ class MaxHashNgramSketch(object):
 
         if hasattr(obj, "nsize") and self.nsize != obj.nsize:
             raise ValueError("Mismatching 'nsize' (have %i, update has %i)" % (self.nsize, obj.nsize))
+
+        if hasattr(obj, "_hashfun") and self._hashfun != obj._hashfun:
+            raise ValueError("Only objects with the same hashfunction can be added.")
         
         extracthash = self._extracthash
         anynew = self._anynew
@@ -268,7 +271,11 @@ class MaxHashNgramSketch(object):
         Add two sketches such as to perserve the sketch property with hash values.
         """
         if self.nsize != obj.nsize:
-            raise ValueError("Only objects with the same 'nsize' can be added.")
+            raise ValueError("Only objects with the same 'nsize' can be added (here %i and %i)." % (self.nsize, obj.nsize))
+        
+        if self._hashfun != obj._hashfun:
+            raise ValueError("Only objects with the same hashfunction can be added.")
+        
         res = type(self)(self.nsize, self.maxsize, self._hashfun)
         res.update(self)
         res.update(obj)
