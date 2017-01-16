@@ -11,6 +11,5 @@ install:
     
 # command to run tests
 script:
-  - python -m pytest src/
-  - python -m pytest --cov=mashingpumpkins --cov-report xml src/
+  - python -m pytest --cov=. --cov-report xml src/
   - bash <(curl -s https://codecov.io/bash)
