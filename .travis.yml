@@ -4,11 +4,12 @@ python:
   - "3.5"
   - "3.6"
 
-# command to install dependencies
-install:
+before_install:
   - pip install codecov
   - pip install pytest-cov
-  - pip install .
+    
+install:
+  - python setup.py install
     
 # command to run tests
 script:
