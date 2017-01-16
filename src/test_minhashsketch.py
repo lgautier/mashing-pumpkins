@@ -8,7 +8,6 @@ from mashingpumpkins.minhashsketch import (MaxHashNgramSketch,
                                            MaxHashNgramCountSketch,
                                            FrozenHashNgramSketch)
 
-
 def _test_MaxHashNgramSketch(sequence, nsize, maxsize):
     # set the hashing function, size of ngrams, max size for the minhash sketch
     hashfun = hasharray
@@ -236,7 +235,6 @@ def test_MaxHashNgramCountSketch():
 
     
 def test_MaxHashNgramCountSketch_add():
-
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
@@ -273,7 +271,43 @@ def test_MaxHashNgramCountSketch_add():
     #FIXME: add test for .add_hashvalues
     #FIXME: add test for .update
 
+def test_MaxHashNgramCountSketch_update():
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
+    hashfun = hasharray
+
+    nsize = 2
+    maxsize = 10
+
+    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun)
+    mhs.add(sequence)
+    
+    mhs_a = MaxHashNgramCountSketch(nsize, maxsize, hashfun)
+    i = len(sequence)//2
+    mhs_a.add(sequence[:i])
+    assert mhs_a.nvisited == (i-nsize+1)
+
+    mhs_b = MaxHashNgramCountSketch(nsize, maxsize, hashfun)
+    mhs_b.add(sequence[(i-nsize+1):])
+    assert mhs_b.nvisited == (len(sequence)-i)
+    
+    mhs_a.update(mhs_b)
+
+    allcounthash = Counter()
+    hbuffer = array.array('Q', [0,])
+    for i in range(0, len(sequence)-nsize+1):
+        ngram = sequence[i:(i+nsize)]
+        hashfun(ngram, nsize, hbuffer)
+        allcounthash[hbuffer[0]] += 1
+    maxhash = sorted(allcounthash.keys(), reverse=True)[:maxsize]
+
+    
+    assert len(set(maxhash) ^ mhs_a._heapset) == 0
+
+    for h, value in mhs_a._count.items():
+        assert allcounthash[h] == value
+    
 def test_FrozenHashNgramSketch():
     
     nsize = 2

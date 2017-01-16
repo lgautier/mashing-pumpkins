@@ -244,14 +244,16 @@ class MaxHashNgramSketch(object):
                     self._add_elt_unsafe(elt)
                     heaptop = extracthash(heap[0])
                     lheap += 1
-                if anynew is not None:
-                    anynew(elt)
+                # no anynew: responsibility of child class
+                # if anynew is not None:
+                #     anynew(h)
             if h  >= heaptop:
                 if h not in heapset:
                     out = self._replace(h, elt)
                     heaptop = extracthash(heap[0])
-                if anynew is not None:
-                    anynew(elt)
+                # no anynew: responsibility of child class
+                # if anynew is not None:
+                #     anynew(h)
 
         self._nvisited += obj.nvisited
             
@@ -303,7 +305,12 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
     def _anynew(self, h):
         self._count[h] += 1
 
-    
+    def update(self, obj):
+        super().update(obj)
+        count = self._count
+        for k in self._heapset:
+            count[k] += obj._count[k]
+        
 class FrozenHashNgramSketch(object):
     """
     Read-only sketch.
