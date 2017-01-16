@@ -3,6 +3,8 @@ from collections import Counter
 import array
 from sequence import chunkpos_iter
 
+
+
 class MaxHashNgramSketch(object):
     
     """
@@ -221,7 +223,7 @@ class MaxHashNgramSketch(object):
 
     def update(self, obj):
         """
-        Update the sketch with elements from `obj` in place.
+        Update the sketch with elements from `obj` in place (use `__add__` instead to make a copy).
 
         - obj: an iterable of elements (each element as returned by `_make_elt()`
         """
@@ -256,12 +258,24 @@ class MaxHashNgramSketch(object):
                 #     anynew(h)
 
         self._nvisited += obj.nvisited
-        
+
+
+    def __add__(self, obj):
+        """
+        Add two sketches such as to perserve the sketch property with hash values.
+        """
+        res = type(self)(self.nsize, self.maxsize, self._hashfun)
+        res.update(self)
+        res.update(obj)
+        return res
+
+    
     def __iter__(self):
         """
         Return an iterator over the elements in the sketch.
         """
         return iter(sorted(self._heap))
+
 
 
 class MaxHashNgramCountSketch(MaxHashNgramSketch):

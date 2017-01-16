@@ -90,7 +90,7 @@ def test_MaxHashNgramSketch_shorter_than_buffer():
     maxsize = 10
     _test_MaxHashNgramSketch(sequence, nsize, maxsize)
 
-def _test_MaxHashNgramSketch_update(sequence, maxsize):
+def _test_MaxHashNgramSketch_update(sequence, maxsize, methodname):
     # set the hashing function, size of ngrams, max size for the minhash sketch
     hashfun = hasharray
     nsize = 21
@@ -106,25 +106,40 @@ def _test_MaxHashNgramSketch_update(sequence, maxsize):
     mhs_b.add(seq_b)
     assert mhs_b.nvisited == (len(seq_b)-nsize+1)
 
-    mhs_a.update(mhs_b)
+    res = getattr(mhs_a, methodname)(mhs_b)
 
-    assert mhs_a.nvisited == mhs.nvisited
-    assert len(mhs_a) == len(mhs)
-    assert len(mhs_a._heap) == len(mhs._heap)
-    assert len(mhs_a._heapset) == len(mhs._heapset)
-    assert len(tuple(mhs_a)) == len(tuple(mhs_a))
+    if res is None:
+        # in-place method
+        res = mhs_a
+    assert res.nvisited == mhs.nvisited
+    assert len(res) == len(mhs)
+    assert len(res._heap) == len(mhs._heap)
+    assert len(res._heapset) == len(mhs._heapset)
+    assert len(tuple(res)) == len(tuple(mhs))
 
-    assert len(mhs_a._heapset ^ mhs._heapset) == 0
+    assert len(res._heapset ^ mhs._heapset) == 0
 
 def test_MaxHashNgramSketch_update():
+    methodname = 'update'
     # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
     maxsize = 10
-    _test_MaxHashNgramSketch_update(sequence, maxsize)
+    _test_MaxHashNgramSketch_update(sequence, maxsize, methodname)
 
     maxsize = 150
-    _test_MaxHashNgramSketch_update(sequence, maxsize)
+    _test_MaxHashNgramSketch_update(sequence, maxsize, methodname)
+
+def test_MaxHashNgramSketch_add():
+    methodname = '__add__'
+    # random (DNA) sequence
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
+    maxsize = 10
+    _test_MaxHashNgramSketch_update(sequence, maxsize, methodname)
+
+    maxsize = 150
+    _test_MaxHashNgramSketch_update(sequence, maxsize, methodname)
 
 
 def _test_MaxHashNgramSketch_add_hashvalues(nsize, maxsize, hashfun):
