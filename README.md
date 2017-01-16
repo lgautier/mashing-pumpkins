@@ -1,6 +1,6 @@
 # mashing-pumpkins
 
-minhashing-related miscellanea
+Convenient-yet-pretty-fast minhashing-related miscellanea for Python >= 3.5.
 
 [![Build Status](https://travis-ci.org/lgautier/mashing-pumpkins.svg?branch=master)](https://travis-ci.org/lgautier/mashing-pumpkins)
 [![codecov](https://codecov.io/gh/lgautier/mashing-pumpkins/branch/master/graph/badge.svg)](https://codecov.io/gh/lgautier/mashing-pumpkins)
@@ -17,7 +17,7 @@ a notebooks in the [doc/](doc/) demonstrating the usage.
 
 ## Installation
 
-Python 3.5 or 3.6 and a C++ compiler are pretty much everything needed. With pip, installing the "master" branch can be done with:
+Python 3.5 or 3.6 and a C/C++ compiler (C99-aware) are pretty much everything needed. With pip, installing the "master" branch can be done with:
 
 `pip install git+https://https://github.com/lgautier/mashing-pumpkins.git`
 
