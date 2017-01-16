@@ -228,6 +228,9 @@ class MaxHashNgramSketch(object):
         - obj: an iterable of elements (each element as returned by `_make_elt()`
         """
 
+        if hasattr(obj, "nsize") and self.nsize != obj.nsize:
+            raise ValueError("Mismatching 'nsize' (have %i, update has %i)" % (self.nsize, obj.nsize))
+        
         extracthash = self._extracthash
         anynew = self._anynew
         heap = self._heap
@@ -264,6 +267,8 @@ class MaxHashNgramSketch(object):
         """
         Add two sketches such as to perserve the sketch property with hash values.
         """
+        if self.nsize != obj.nsize:
+            raise ValueError("Only objects with the same 'nsize' can be added.")
         res = type(self)(self.nsize, self.maxsize, self._hashfun)
         res.update(self)
         res.update(obj)

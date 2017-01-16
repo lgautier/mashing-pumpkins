@@ -101,6 +101,13 @@ def _test_MaxHashNgramSketch_update(sequence, maxsize, methodname):
     seq_a = sequence[:(len(sequence)//2)]
     mhs_a.add(seq_a)
     assert mhs_a.nvisited == (len(seq_a)-nsize+1)
+
+    # mismatching nsize
+    mhs_c = MaxHashNgramSketch(nsize+1, maxsize, hashfun)
+    with pytest.raises(ValueError):
+        getattr(mhs_a, methodname)(mhs_c)
+
+    
     mhs_b = MaxHashNgramSketch(nsize, maxsize, hashfun)
     seq_b = sequence[(len(sequence)//2-nsize+1):]
     mhs_b.add(seq_b)
