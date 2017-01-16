@@ -322,9 +322,6 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
                 raise ValueError("Mismatching keys with the parameter 'count'.")
         self._count = count
 
-    def _add_elt_unsafe(self, elt):
-        super()._add_elt_unsafe(elt)
-
     def _replace(self, h, elt):
         out = super()._replace(h, elt)
         del(self._count[self._extracthash(out)])
