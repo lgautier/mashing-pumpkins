@@ -221,7 +221,7 @@ class MaxHashNgramSketch(object):
 
     def update(self, obj):
         """
-        Update the sketch with elements from `obj`.
+        Update the sketch with elements from `obj` in place.
 
         - obj: an iterable of elements (each element as returned by `_make_elt()`
         """
@@ -256,7 +256,7 @@ class MaxHashNgramSketch(object):
                 #     anynew(h)
 
         self._nvisited += obj.nvisited
-            
+        
     def __iter__(self):
         """
         Return an iterator over the elements in the sketch.
@@ -306,6 +306,9 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
         self._count[h] += 1
 
     def update(self, obj):
+        """
+        In addition to the parent class' method `update()`, this is ensuring that the counts are properly updated.
+        """
         super().update(obj)
         count = self._count
         for k in self._heapset:
