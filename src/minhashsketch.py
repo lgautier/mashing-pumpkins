@@ -50,16 +50,17 @@ class MaxHashNgramSketch(object):
         """ Number of ngrams / kmers visited (considered for inclusion) so far. """
         return self._nvisited
 
-    def _add_elt_unsafe(self, elt):
+    def _add_elt_unsafe(self, h, elt):
         """ 
         Add an element.
 
+        - h: hash value
         - elt: an object as returned by the method `make_elt()` 
 
         Note: This method does not check whether the element is satisfying
-        the MaxHash property,        
+        the MaxHash property.
         """
-        self._heapset.add(self._extracthash(elt))
+        self._heapset.add(h)
         heappush(self._heap, elt)
 
     def _replace(self, h, elt):
@@ -127,7 +128,7 @@ class MaxHashNgramSketch(object):
             if lheap < maxsize:
                 if h not in heapset:
                     elt = make_elt(h, ngram)
-                    self._add_elt_unsafe(elt)
+                    self._add_elt_unsafe(h, elt)
                     heaptop = extracthash(heap[0])
                     lheap += 1
                 if anynew is not None:
@@ -171,7 +172,7 @@ class MaxHashNgramSketch(object):
                 if h not in heapset:
                     ngram = subs[j:(j+nsize)]
                     elt = make_elt(h, ngram)
-                    self._add_elt_unsafe(elt)
+                    self._add_elt_unsafe(h, elt)
                     heaptop = extracthash(heap[0])
                     lheap += 1
                 if anynew is not None:
@@ -249,7 +250,7 @@ class MaxHashNgramSketch(object):
             h = extracthash(elt)
             if lheap < maxsize:
                 if h not in heapset:
-                    self._add_elt_unsafe(elt)
+                    self._add_elt_unsafe(h, elt)
                     heaptop = extracthash(heap[0])
                     lheap += 1
                 # no anynew: responsibility of child class
