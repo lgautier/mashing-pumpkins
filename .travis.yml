@@ -6,6 +6,7 @@ python:
 
 before_install:
   - pip install codecov
+  - pip install pytest --upgrade
   - pip install pytest-cov
     
 install:

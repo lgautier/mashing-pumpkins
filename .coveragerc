@@ -1,7 +1,6 @@
 # .coveragerc to control coverage.py
 [run]
-branch = True
-
+omit=src/test_*.py
 
 [report]
 ignore_errors = True
