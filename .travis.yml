@@ -13,6 +13,6 @@ install:
     
 # command to run tests
 script:
-  - python -m pytest --cov=mashingpumpkins.sequence --cov=mashingpumpkins --cov-report xml --cov-report term src/
+  - python -m pytest --cov=mashingpumpkins --cov-report xml --cov-report term src/
   - codecov
   
