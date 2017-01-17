@@ -226,8 +226,6 @@ def test_MaxHashNgramSketch_add_hashvalues_2calls():
 
 def test_MaxHashNgramCountSketch():
 
-    random.seed(123)
-    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
     hashfun = hasharray
 
     nsize = 2
@@ -298,6 +296,26 @@ def test_MaxHashNgramCountSketch_add():
 
     #FIXME: add test for .add_hashvalues
     #FIXME: add test for .update
+
+
+def test_MaxHashNgramCountSketch_freeze():
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
+
+    hashfun = hasharray
+
+    nsize = 2
+    maxsize = 10
+    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun)
+    mhs.add(sequence)
+
+    fmhs = mhs.freeze()
+    assert mhs.maxsize == fmhs.maxsize
+    assert mhs.nsize == fmhs.nsize
+    assert mhs.nvisited == fmhs.nvisited
+
+    assert len(mhs._heapset ^ fmhs._sketch) == 0
+
 
 def test_MaxHashNgramCountSketch_update():
     random.seed(123)

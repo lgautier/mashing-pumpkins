@@ -288,6 +288,9 @@ class MaxHashNgramSketch(object):
         """
         return iter(sorted(self._heap))
 
+    def freeze(self):
+        return FrozenHashNgramSketch(self._heapset, self.nsize, self._hashfun,
+                                     self.maxsize, self.nvisited)
 
 
 class MaxHashNgramCountSketch(MaxHashNgramSketch):
@@ -339,17 +342,23 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
         count = self._count
         for k in self._heapset:
             count[k] += obj._count[k]
-        
+
+    def freeze(self):
+        return FrozenHashNgramCountSketch(self._heapset, self._count, self._nsize, self._hashfun,
+                                          self.maxsize, self.nvisited)
+
+
 class FrozenHashNgramSketch(object):
     """
     Read-only sketch.
     """
 
-    def __init__(self, sketch : set, nsize : int, maxsize : int = None, nvisited: int = None):
+    def __init__(self, sketch : set, nsize : int, hashfun = hash, maxsize : int = None, nvisited: int = None):
         """
         Create an instance from:
-        - setobj: a set
+        - sketch: a set
         - nsize: a kmer/ngram size
+        - hashfun: 
         - maxsize: a maximum size for the input set (if missing, this is assumed to be len(setobj)
         - nvisited: the number of kmers/ngrams visited to create setobj
         """
@@ -365,6 +374,7 @@ class FrozenHashNgramSketch(object):
 
         self._sketch = frozenset(sketch)
         self._nsize = nsize
+        self._hashfun = hashfun
         self._maxsize = maxsize
         self._nvisited = nvisited
 
@@ -390,3 +400,20 @@ class FrozenHashNgramSketch(object):
     def __len__(self):
         """ Return the number of elements in the set. """
         return len(self._sketch)
+
+
+class FrozenHashNgramCountSketch(FrozenHashNgramSketch):
+
+    def __init__(self, sketch : set, count: Counter, nsize : int, hashfun = hash, maxsize : int = None, nvisited: int = None):
+        """
+        Create an instance from:
+        - sketch: a set
+        - count: a counter
+        - nsize: a kmer/ngram size
+        - hashfun: 
+        - maxsize: a maximum size for the input set (if missing, this is assumed to be len(setobj)
+        - nvisited: the number of kmers/ngrams visited to create setobj
+        """
+
+        super().__init__(sketch, nsize, hashfun = hashfun, maxsize = maxsize, nvisited = nvisited)
+        self._count = count.copy()

@@ -52,4 +52,3 @@ def test_sketch_map_sequences():
     assert mhs.maxsize == maxsize
     assert mhs.nvisited == len(sequence)-nsize+1
 
-    
