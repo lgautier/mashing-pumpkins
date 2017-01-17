@@ -1,6 +1,6 @@
 # .coveragerc to control coverage.py
 [run]
-omit=src/test_*.py
+omit=test_*.py
 
 [report]
 ignore_errors = True
