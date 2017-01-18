@@ -175,7 +175,7 @@ def _test_MaxHashNgramSketch_add_hashvalues(nsize, maxsize, hashfun):
     mhs_a.add(sequence)
 
     seq_hash = list()
-    for i in range(0, len(sequence)-nsize):
+    for i in range(0, len(sequence)-nsize+1):
         ngram = sequence[i:(i+nsize)]
         hashfun(ngram, nsize, hbuffer)
         seq_hash.append((ngram, hbuffer[0]))
