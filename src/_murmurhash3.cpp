@@ -1,7 +1,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <MurmurHash3.h>
-uint32_t MINHASH_DEFAULT_SEED = 0;
+uint32_t MINHASH_DEFAULT_SEED = 42;
 
 #include <stdio.h>
 
