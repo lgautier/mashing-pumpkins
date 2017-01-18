@@ -16,7 +16,7 @@ hasharray(PyObject * self, PyObject * args)
   Py_ssize_t width ;
   Py_buffer inputbuf;
   Py_buffer arraybuf;
-  const uint32_t seed = MINHASH_DEFAULT_SEED;
+  uint32_t seed = MINHASH_DEFAULT_SEED;
 
   if (!PyArg_ParseTuple(args, "s*ny*|I", &inputbuf, &width, &arraybuf, &seed)) {
     return NULL;
