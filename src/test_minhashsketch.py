@@ -8,6 +8,20 @@ from mashingpumpkins.minhashsketch import (MaxHashNgramSketch,
                                            MaxHashNgramCountSketch,
                                            FrozenHashNgramSketch)
 
+def _allngramshashed(sequence, nsize, hashfun):
+    # list with all hash values
+    allhash = list()
+    hbuffer = array.array('Q', [0, ])
+
+    # sliding window of width nsize
+    for i in range(0, len(sequence)-nsize+1):
+        ngram = sequence[i:(i+nsize)]
+        hashfun(ngram, nsize, hbuffer)
+        allhash.append((hbuffer[0], ngram))
+
+    allhash.sort(reverse=True)
+    return allhash
+
 def _test_MaxHashNgramSketch(sequence, nsize, maxsize):
     # set the hashing function, size of ngrams, max size for the minhash sketch
     hashfun = hasharray
@@ -29,16 +43,10 @@ def _test_MaxHashNgramSketch(sequence, nsize, maxsize):
         assert len(mhs._heapset) == maxsize
         assert len(tuple(mhs)) == maxsize
 
+    allhash = _allngramshashed(sequence, nsize, hashfun)
+    
     # extract all ngrams/kmers of length nsize in the test sequence
-    allhash = list()
-    hbuffer = array.array('Q', [0, ])
-    for i in range(0, len(sequence)-nsize+1):
-        ngram = sequence[i:(i+nsize)]
-        hashfun(ngram, nsize, hbuffer)
-        allhash.append((hbuffer[0], ngram))
-    # slice the 10 biggest out
-    allhash.sort(reverse=True)
-    maxhash = set(mhs._extracthash(x) for x in allhash[:maxsize])
+    maxhash = set(x[0] for x in allhash[:maxsize])
 
     # check that the slice above matches the content of the maxhash sketch
     assert len(maxhash ^ mhs._heapset) == 0
