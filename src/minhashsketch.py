@@ -12,6 +12,7 @@ class MaxHashNgramSketch(object):
     """
 
     _anynew = None
+    _initheap = 0
     
     def __init__(self, nsize: int,
                  maxsize: int,
@@ -212,7 +213,7 @@ class MaxHashNgramSketch(object):
         if lheap > 0:
             heaptop = extracthash(heap[0])
         else:
-            heaptop = 0
+            heaptop = self._initheap
 
         for slice_beg, slice_end in chunkpos_iter(nsize, lseq, w):
             subs = seq[slice_beg:slice_end] # safe: no out-of-bound in Python
@@ -244,7 +245,7 @@ class MaxHashNgramSketch(object):
         if lheap > 0:
             heaptop = extracthash(heap[0])
         else:
-            heaptop = 0
+            heaptop = self._initheap
         
         for elt in obj:
             h = extracthash(elt)
@@ -294,6 +295,124 @@ class MaxHashNgramSketch(object):
                                      self.maxsize, self.nvisited)
 
 
+class MinHashNgramSketch(MaxHashNgramSketch):
+    _initheap = 0
+
+    @staticmethod
+    def _make_elt(h, ngram):
+        """
+        Make an element to store into the sketch
+        
+        - h: a hash value
+        - ngram: the object (ngram/kmer) at the source of the hash value
+        """
+        return (-h, ngram)
+
+    
+    def _replace(self, h, elt):
+        """
+        insert/replace an element
+
+        - h: a hash value
+        - elt: an object as returned by the method `make_elt()` 
+        """
+        heapset = self._heapset
+        heapset.add(h)
+        out = heapreplace(self._heap, elt)
+        heapset.remove(-self._extracthash(out))
+        return out
+
+
+    def _add(self, subs, nsubs, hashbuffer, heaptop,
+             extracthash, make_elt, replace, anynew) -> int:
+        """
+        Process/add elements to the sketch.
+
+        If calling this method directly, updating the attribute
+        `nvisited` is under your responsibility.
+
+        - subs: (sub-)sequence
+        - nsubs: number of hash values in the hashbuffer
+        - hashbuffer: buffer with hash values
+        - heaptop: top of the heap
+        - extracthash:
+        - make_elt:
+        - replace:
+        - anynew:
+        """
+
+        nsize = self._nsize
+        heap = self._heap
+        lheap = len(heap)
+        heapset = self._heapset
+        maxsize = self._maxsize
+        
+        for j in range(nsubs):
+            h = hashbuffer[j]
+            if lheap < maxsize:
+                if h not in heapset:
+                    ngram = subs[j:(j+nsize)]
+                    elt = make_elt(h, ngram)
+                    self._add_elt_unsafe(h, elt)
+                    heaptop = - extracthash(heap[0])
+                    lheap += 1
+                if anynew is not None:
+                    anynew(h)
+            elif h  <= heaptop:
+                if h not in heapset:
+                    ngram = subs[j:(j+nsize)]
+                    elt = make_elt(h, ngram)
+                    out = replace(h, elt)
+                    heaptop = - extracthash(heap[0])
+                if anynew is not None:
+                    anynew(h)
+        return heaptop
+
+    def update(self, obj):
+        """
+        Update the sketch with elements from `obj` in place (use `__add__` instead to make a copy).
+
+        - obj: an iterable of elements (each element as returned by `_make_elt()`
+        """
+
+        if hasattr(obj, "nsize") and self.nsize != obj.nsize:
+            raise ValueError("Mismatching 'nsize' (have %i, update has %i)" % (self.nsize, obj.nsize))
+
+        if hasattr(obj, "_hashfun") and self._hashfun != obj._hashfun:
+            raise ValueError("Only objects with the same hashfunction can be added.")
+        
+        extracthash = self._extracthash
+        anynew = self._anynew
+        heap = self._heap
+        lheap = len(heap)
+        heapset = self._heapset
+        maxsize = self._maxsize
+        if lheap > 0:
+            heaptop = -extracthash(heap[0])
+        else:
+            heaptop = self._initheap
+        
+        for elt in obj:
+            h = -extracthash(elt)
+            if lheap < maxsize:
+                if h not in heapset:
+                    self._add_elt_unsafe(h, elt)
+                    heaptop = -extracthash(heap[0])
+                    lheap += 1
+                # no anynew: responsibility of child class
+                # if anynew is not None:
+                #     anynew(h)
+            if h  <= heaptop:
+                if h not in heapset:
+                    out = self._replace(h, elt)
+                    heaptop = -extracthash(heap[0])
+                # no anynew: responsibility of child class
+                # if anynew is not None:
+                #     anynew(h)
+
+        self._nvisited += obj.nvisited
+
+    
 class MaxHashNgramCountSketch(MaxHashNgramSketch):
     """
     MaxHash Sketch where the number of times an hash value was found is stored
@@ -349,6 +468,7 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
                                           self.maxsize, self.nvisited)
 
 
+    
 class FrozenHashNgramSketch(object):
     """
     Read-only sketch.
