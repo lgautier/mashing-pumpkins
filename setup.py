@@ -34,6 +34,13 @@ mmh_mod = Extension("%s._murmurhash3" % PACKAGENAME,
                     extra_compile_args = extra_compile_args + \
                     ['-O3'])                    
 
+mmhmash_mod = Extension("%s._murmurhash3_mash" % PACKAGENAME,
+                        sources=["src/_murmurhash3_mash.cpp", "src/MurmurHash3.cpp"],
+                        include_dirs=["src",],
+                        language="c++",
+                        extra_compile_args = extra_compile_args + \
+                        ['-O3'])                    
+
 xxh_mod = Extension("%s._xxhash" % PACKAGENAME,
                     sources=["src/_xxhash.c", "src/xxhash.c"],
                     include_dirs=["src",],
@@ -54,7 +61,7 @@ setup(
     email = "lgautier@gmail.com",
     packages = [PACKAGENAME],
     package_dir = {PACKAGENAME: 'src'},
-    ext_modules = [mmh_mod, xxh_mod],
+    ext_modules = [mmh_mod, mmhmash_mod, xxh_mod],
     classifiers = CLASSIFIERS)
 
 
