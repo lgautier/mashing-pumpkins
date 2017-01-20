@@ -8,7 +8,7 @@ def chunkpos_iter(nsize: int, lseq: int, w: int) -> (int, int):
 
     - nsize: n in ngram
     - lseq: length of sequence to chunk
-    - w: width of buffer
+    - w: width of window
 
     """
     

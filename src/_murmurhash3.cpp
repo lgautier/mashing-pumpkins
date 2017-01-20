@@ -57,6 +57,7 @@ hasharray(PyObject * self, PyObject * args)
   return PyLong_FromSsize_t(maxi);
 }
 
+
 static PyMethodDef murmurhash3ModuleMethods[] = {
     {
       "hasharray", (PyCFunction)hasharray,

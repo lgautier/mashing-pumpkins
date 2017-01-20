@@ -3,7 +3,9 @@ from collections import Counter
 import array
 from mashingpumpkins.sequence import chunkpos_iter
 
-
+# types of sketches
+TYPE_MAXHASH = 0
+TYPE_MINHASH = 1
 
 class MaxHashNgramSketch(object):
     
@@ -13,6 +15,7 @@ class MaxHashNgramSketch(object):
 
     _anynew = None
     _initheap = 0
+    _sketchtype = TYPE_MAXHASH
     
     def __init__(self, nsize: int,
                  maxsize: int,
@@ -227,9 +230,15 @@ class MaxHashNgramSketch(object):
         """
         Update the sketch with elements from `obj` in place (use `__add__` instead to make a copy).
 
-        - obj: an iterable of elements (each element as returned by `_make_elt()`
+        - obj: An instance of class MaxHashNgramSketch (or an instance of a child class)
         """
 
+        assert isinstance(obj, MaxHashNgramSketch)
+        
+        if not obj._sketchtype == self._sketchtype:
+            raise ValueError("Mismatching sketch type. This is a %s and the update is a %s" % (self._sketchtype,
+                                                                                               obj._sketchtype))
+        
         if hasattr(obj, "nsize") and self.nsize != obj.nsize:
             raise ValueError("Mismatching 'nsize' (have %i, update has %i)" % (self.nsize, obj.nsize))
 
@@ -297,6 +306,7 @@ class MaxHashNgramSketch(object):
 
 class MinHashNgramSketch(MaxHashNgramSketch):
     _initheap = 0
+    _sketchtype = TYPE_MINHASH
 
     @staticmethod
     def _make_elt(h, ngram):
@@ -372,8 +382,10 @@ class MinHashNgramSketch(MaxHashNgramSketch):
         """
         Update the sketch with elements from `obj` in place (use `__add__` instead to make a copy).
 
-        - obj: an iterable of elements (each element as returned by `_make_elt()`
+        - obj: a MinHashNgramSketch (or instance of a child class)
         """
+
+        assert isinstance(obj, MinHashNgramSketch)
 
         if hasattr(obj, "nsize") and self.nsize != obj.nsize:
             raise ValueError("Mismatching 'nsize' (have %i, update has %i)" % (self.nsize, obj.nsize))
