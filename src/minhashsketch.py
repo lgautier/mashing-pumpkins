@@ -20,7 +20,8 @@ class MaxHashNgramSketch(object):
     def __init__(self, nsize: int,
                  maxsize: int,
                  hashfun,
-                 heap : list = None,
+                 seed : int,
+                 heap: list = None,
                  nvisited: int = 0):
         """
         - nsize: size of the ngrams / kmers
@@ -32,6 +33,7 @@ class MaxHashNgramSketch(object):
         self._nsize = nsize
         self._maxsize = maxsize
         self._hashfun = hashfun
+        self._seed = seed
         if heap is None:
             self._heap = list()
         else:
@@ -48,6 +50,11 @@ class MaxHashNgramSketch(object):
     def nsize(self):
         """ Size of the ngrams / kmers. """
         return self._nsize
+
+    @property
+    def seed(self):
+        """ Seed for hashfun """
+        return self._seed
 
     @property
     def nvisited(self):
@@ -200,6 +207,7 @@ class MaxHashNgramSketch(object):
 
         """
         hashfun = self._hashfun
+        seed = self._seed
         heap = self._heap
         maxsize = self._maxsize
         nsize = self._nsize
@@ -220,7 +228,7 @@ class MaxHashNgramSketch(object):
 
         for slice_beg, slice_end in chunkpos_iter(nsize, lseq, w):
             subs = seq[slice_beg:slice_end] # safe: no out-of-bound in Python
-            nsubs = hashfun(subs, nsize, hashbuffer)
+            nsubs = hashfun(subs, nsize, hashbuffer, seed)
             heaptop = self._add(subs, nsubs, hashbuffer, heaptop,
                                 extracthash, make_elt, self._replace, anynew)
             self._nvisited += nsubs
@@ -244,7 +252,10 @@ class MaxHashNgramSketch(object):
 
         if hasattr(obj, "_hashfun") and self._hashfun != obj._hashfun:
             raise ValueError("Only objects with the same hashfunction can be added.")
-        
+
+        if self.seed != obj.seed:
+            raise ValueError("Mismatching seed value. This has %i and the update has %i" % (self.seed, obj.seed))
+
         extracthash = self._extracthash
         anynew = self._anynew
         heap = self._heap
@@ -286,8 +297,11 @@ class MaxHashNgramSketch(object):
         
         if self._hashfun != obj._hashfun:
             raise ValueError("Only objects with the same hashfunction can be added.")
+
+        if self.seed != obj.seed:
+            raise ValueError("Only objects with the same seed can be added.")
         
-        res = type(self)(self.nsize, self.maxsize, self._hashfun)
+        res = type(self)(self.nsize, self.maxsize, self._hashfun, self.seed)
         res.update(self)
         res.update(obj)
         return res
@@ -301,7 +315,9 @@ class MaxHashNgramSketch(object):
 
     def freeze(self):
         return FrozenHashNgramSketch(self._heapset, self.nsize, self._hashfun,
-                                     self.maxsize, self.nvisited)
+                                     seed = self.seed,
+                                     maxsize = self.maxsize,
+                                     nvisited = self.nvisited)
 
 
 class MinHashNgramSketch(MaxHashNgramSketch):
@@ -392,6 +408,9 @@ class MinHashNgramSketch(MaxHashNgramSketch):
 
         if hasattr(obj, "_hashfun") and self._hashfun != obj._hashfun:
             raise ValueError("Only objects with the same hashfunction can be added.")
+
+        if self.seed != obj.seed:
+            raise ValueError("Mismatching seed value. This has %i and the update has %i" % (self.seed, obj.seed))
         
         extracthash = self._extracthash
         anynew = self._anynew
@@ -430,7 +449,8 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
     MaxHash Sketch where the number of times an hash value was found is stored
     """
 
-    def __init__(self, nsize: int, maxsize: int, hashfun,
+    def __init__(self, nsize: int, maxsize: int,
+                 hashfun, seed: int,
                  heap : list = None,
                  count : Counter = None,
                  nvisited: int = 0):
@@ -438,11 +458,12 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
         - nsize: size of the ngrams / kmers
         - maxsize: maximum size for the sketch
         - hashfun: function used for hashing - `hashfun(byteslike) -> hash value`
+        - seed: a seed for hashfun
         - heap: heapified list (if unsure about what it is, don't change the default)
         - count: a collections.Counter
         - nvisited: number of kmers visited so far
         """
-        super().__init__(nsize, maxsize, hashfun,
+        super().__init__(nsize, maxsize, hashfun, seed,
                          heap = heap, nvisited = nvisited)
         if count is None:
             count = Counter()
@@ -477,7 +498,9 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
 
     def freeze(self):
         return FrozenHashNgramCountSketch(self._heapset, self._count, self._nsize, self._hashfun,
-                                          self.maxsize, self.nvisited)
+                                          seed = self.seed,
+                                          maxsize = self.maxsize,
+                                          nvisited = self.nvisited)
 
 
     
@@ -486,12 +509,13 @@ class FrozenHashNgramSketch(object):
     Read-only sketch.
     """
 
-    def __init__(self, sketch : set, nsize : int, hashfun = hash, maxsize : int = None, nvisited: int = None):
+    def __init__(self, sketch : set, nsize : int, hashfun = hash, seed: int = None, maxsize : int = None, nvisited: int = None):
         """
         Create an instance from:
         - sketch: a set
         - nsize: a kmer/ngram size
         - hashfun: 
+        - seed: an optional seed for hashfun
         - maxsize: a maximum size for the input set (if missing, this is assumed to be len(setobj)
         - nvisited: the number of kmers/ngrams visited to create setobj
         """
@@ -508,6 +532,7 @@ class FrozenHashNgramSketch(object):
         self._sketch = frozenset(sketch)
         self._nsize = nsize
         self._hashfun = hashfun
+        self._seed = seed
         self._maxsize = maxsize
         self._nvisited = nvisited
 
@@ -537,16 +562,20 @@ class FrozenHashNgramSketch(object):
 
 class FrozenHashNgramCountSketch(FrozenHashNgramSketch):
 
-    def __init__(self, sketch : set, count: Counter, nsize : int, hashfun = hash, maxsize : int = None, nvisited: int = None):
+    def __init__(self, sketch : set, count: Counter, nsize : int,
+                 hashfun = hash, seed: int = None,
+                 maxsize : int = None, nvisited: int = None):
         """
         Create an instance from:
         - sketch: a set
         - count: a counter
         - nsize: a kmer/ngram size
         - hashfun: 
+        - seed: an optional seed for hashfun
         - maxsize: a maximum size for the input set (if missing, this is assumed to be len(setobj)
         - nvisited: the number of kmers/ngrams visited to create setobj
         """
 
-        super().__init__(sketch, nsize, hashfun = hashfun, maxsize = maxsize, nvisited = nvisited)
+        super().__init__(sketch, nsize, hashfun = hashfun, seed = seed,
+                         maxsize = maxsize, nvisited = nvisited)
         self._count = count.copy()
