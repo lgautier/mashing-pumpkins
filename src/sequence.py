@@ -11,7 +11,7 @@ def chunkpos_iter(nsize: int, lseq: int, w: int) -> (int, int):
     - w: width of window
 
     """
-    
+
     assert nsize <= w
     ew = w-nsize+1
     
@@ -25,4 +25,4 @@ def chunkpos_iter(nsize: int, lseq: int, w: int) -> (int, int):
     for w_i in range(nchunks):
         slice_beg = (w_i*ew)
         slice_end = slice_beg + w
-        yield (slice_beg, slice_end)
+        yield (slice_beg, min(slice_end, lseq))
