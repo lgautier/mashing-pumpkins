@@ -8,17 +8,27 @@ from array import array
 DEFAULT_SEED = 42 #sourmash_lib._minhash.MINHASH_DEFAULT_SEED
 
 
-trans_tbl = bytearray(256)
-for x,y in zip(b'ATGC', b'TACG'):
-    trans_tbl[x] = y
+compl_tbl = bytearray(256)
+for x,y in zip(b'ATGCN', b'TACGN'):
+    compl_tbl[x] = y
+
+# FIXME: masking translation table currently unused
+maskatgc_tbl = bytearray(256)
+for x,y in zip(b'ATGCN', b'ATGCN'):
+    maskatgc_tbl[x] = y
+
+sourmashmaskatgc_tbl = bytearray([ord(b'N'),]*256)
+for x,y in zip(b'ATGC', b'ATGC'):
+    sourmashmaskatgc_tbl[x] = y
 
 def revcomp(sequence):
     ba = bytearray(sequence)
     ba.reverse()
-    ba = ba.translate(trans_tbl)
+    ba = ba.translate(compl_tbl)
     return ba
 
 def mash_hashfun(sequence, nsize, buffer=array('Q', [0,]*300), seed=DEFAULT_SEED):
+    sequence = sequence.translate(sourmashmaskatgc_tbl)
     res =  _murmurhash3_mash.hasharray_withrc(sequence, revcomp(sequence), nsize, buffer, seed)
     return res
 
