@@ -58,8 +58,9 @@ setup(
     description = "Hash sketches of sequences",
     license = "MIT",
     author = "Laurent Gautier",
-    email = "lgautier@gmail.com",
-    packages = [PACKAGENAME],
+    author_email = "lgautier@gmail.com",
+    packages = [PACKAGENAME,
+                PACKAGENAME + '.demo'],
     package_dir = {PACKAGENAME: 'src'},
     ext_modules = [mmh_mod, mmhmash_mod, xxh_mod],
     classifiers = CLASSIFIERS)
