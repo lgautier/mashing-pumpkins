@@ -306,6 +306,10 @@ class MaxHashNgramSketch(object):
         return res
 
     
+    def __iadd__(self, obj):
+        self.update(obj)
+
+        
     def __iter__(self):
         """
         Return an iterator over the elements in the sketch.
