@@ -19,7 +19,21 @@ a notebooks in the [doc/](doc/) demonstrating the usage.
 
 Python 3.5 or 3.6 and a C/C++ compiler (C99-aware) are pretty much everything needed. With pip, installing the "master" branch can be done with:
 
-`pip install git+https://https://github.com/lgautier/mashing-pumpkins.git`
+```bash
+
+pip install git+https://https://github.com/lgautier/mashing-pumpkins.git
+
+```
+
+## Usage
+
+This is primarily a Python libray, but at the time writing we are a little demo section going on:
+
+```bash
+
+python -m mashingpumpkins.demo.cmdline
+
+```
 
 
 ### Misc.
