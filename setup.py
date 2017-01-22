@@ -64,6 +64,9 @@ setup(
                 PACKAGENAME + '.demo'],
     package_dir = {PACKAGENAME: 'src'},
     ext_modules = [mmh_mod, mmhmash_mod, xxh_mod],
+    extras_require = {
+        'test' : ['sourmash'],
+        'demo' : ['sourmash']},
     classifiers = CLASSIFIERS)
 
 
