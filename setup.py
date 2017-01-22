@@ -60,6 +60,7 @@ setup(
     author = "Laurent Gautier",
     author_email = "lgautier@gmail.com",
     packages = [PACKAGENAME,
+                PACKAGENAME + '.tests',
                 PACKAGENAME + '.demo'],
     package_dir = {PACKAGENAME: 'src'},
     ext_modules = [mmh_mod, mmhmash_mod, xxh_mod],
