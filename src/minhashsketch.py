@@ -219,7 +219,6 @@ class MaxHashNgramSketch(object):
         anynew = self._anynew
         make_elt = self._make_elt
         extracthash = self._extracthash
-
         lheap = len(heap)
         if lheap > 0:
             heaptop = extracthash(heap[0])
@@ -232,7 +231,7 @@ class MaxHashNgramSketch(object):
             heaptop = self._add(subs, nsubs, hashbuffer, heaptop,
                                 extracthash, make_elt, self._replace, anynew)
             self._nvisited += nsubs
-                            
+
 
     def update(self, obj):
         """
@@ -325,6 +324,10 @@ class MinHashNgramSketch(MaxHashNgramSketch):
     _sketchtype = TYPE_MINHASH
 
     @staticmethod
+    def _extracthash(heaptop):
+        return - heaptop[0]
+
+    @staticmethod
     def _make_elt(h, ngram):
         """
         Make an element to store into the sketch
@@ -345,7 +348,7 @@ class MinHashNgramSketch(MaxHashNgramSketch):
         heapset = self._heapset
         heapset.add(h)
         out = heapreplace(self._heap, elt)
-        heapset.remove(-self._extracthash(out))
+        heapset.remove(self._extracthash(out))
         return out
 
 
@@ -372,7 +375,7 @@ class MinHashNgramSketch(MaxHashNgramSketch):
         lheap = len(heap)
         heapset = self._heapset
         maxsize = self._maxsize
-        
+
         for j in range(nsubs):
             h = hashbuffer[j]
             if lheap < maxsize:
@@ -380,7 +383,7 @@ class MinHashNgramSketch(MaxHashNgramSketch):
                     ngram = subs[j:(j+nsize)]
                     elt = make_elt(h, ngram)
                     self._add_elt_unsafe(h, elt)
-                    heaptop = - extracthash(heap[0])
+                    heaptop = extracthash(heap[0])
                     lheap += 1
                 if anynew is not None:
                     anynew(h)
@@ -389,9 +392,10 @@ class MinHashNgramSketch(MaxHashNgramSketch):
                     ngram = subs[j:(j+nsize)]
                     elt = make_elt(h, ngram)
                     out = replace(h, elt)
-                    heaptop = - extracthash(heap[0])
+                    heaptop = extracthash(heap[0])
                 if anynew is not None:
                     anynew(h)
+
         return heaptop
 
     def update(self, obj):
@@ -403,10 +407,10 @@ class MinHashNgramSketch(MaxHashNgramSketch):
 
         assert isinstance(obj, MinHashNgramSketch)
 
-        if hasattr(obj, "nsize") and self.nsize != obj.nsize:
+        if hasattr(obj, "nsize") and (self.nsize != obj.nsize):
             raise ValueError("Mismatching 'nsize' (have %i, update has %i)" % (self.nsize, obj.nsize))
 
-        if hasattr(obj, "_hashfun") and self._hashfun != obj._hashfun:
+        if hasattr(obj, "_hashfun") and (self._hashfun != obj._hashfun):
             raise ValueError("Only objects with the same hashfunction can be added.")
 
         if self.seed != obj.seed:
@@ -419,16 +423,16 @@ class MinHashNgramSketch(MaxHashNgramSketch):
         heapset = self._heapset
         maxsize = self._maxsize
         if lheap > 0:
-            heaptop = -extracthash(heap[0])
+            heaptop = extracthash(heap[0])
         else:
             heaptop = self._initheap
         
         for elt in obj:
-            h = -extracthash(elt)
+            h = extracthash(elt)
             if lheap < maxsize:
                 if h not in heapset:
                     self._add_elt_unsafe(h, elt)
-                    heaptop = -extracthash(heap[0])
+                    heaptop = extracthash(heap[0])
                     lheap += 1
                 # no anynew: responsibility of child class
                 # if anynew is not None:
@@ -436,7 +440,7 @@ class MinHashNgramSketch(MaxHashNgramSketch):
             if h  <= heaptop:
                 if h not in heapset:
                     out = self._replace(h, elt)
-                    heaptop = -extracthash(heap[0])
+                    heaptop = extracthash(heap[0])
                 # no anynew: responsibility of child class
                 # if anynew is not None:
                 #     anynew(h)
