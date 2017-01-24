@@ -5,8 +5,10 @@ Convenient-yet-pretty-fast minhashing-related miscellanea for Python >= 3.5.
 [![Build Status](https://travis-ci.org/lgautier/mashing-pumpkins.svg?branch=master)](https://travis-ci.org/lgautier/mashing-pumpkins)
 [![codecov](https://codecov.io/gh/lgautier/mashing-pumpkins/branch/master/graph/badge.svg)](https://codecov.io/gh/lgautier/mashing-pumpkins)
 
-Most of the documentation is currently in docstrings (most, if not all, functions, classes an methods are documented), and in
-a notebooks in the [doc/](doc/) demonstrating the usage.
+The package is rather well documented with:
+- Sphinx documentation in [doc/](doc/) (start with [doc/index.rst](doc/index.rst))
+- Docstrings for most of the functions, classes, and methods
+- A showcase notebook in [doc/notebooks](doc/notebooks)
 
 [MASH](https://github.com/marbl/Mash) and [sourmash](https://github.com/dib-lab/sourmash) started it all. They have good documentation. Check them out !
 
