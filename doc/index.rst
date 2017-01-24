@@ -176,6 +176,9 @@ precisely, by overriding the methods :meth:`__init__`, :meth:`_anynew`, :meth:`_
 Each one of these method contain very little code, and the design made to allow this function to only implement
 additional operations (the methods call the parent class' method, and the added part concern the update of a
 :class:`collections.Counter` to keep track of the number of times a hash values has been seen so far).
+
+The expected benefit is too allow explorations in child classes or other additional structures while keeping the core
+classes relatively lean.
       
 .. autoclass:: mashingpumpkins.minhashsketch.MaxCountSketch
    :show-inheritance:
