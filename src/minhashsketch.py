@@ -7,10 +7,10 @@ from mashingpumpkins.sequence import chunkpos_iter
 TYPE_MAXHASH = 0
 TYPE_MINHASH = 1
 
-class MaxHashNgramSketch(object):
+class MaxSketch(object):
     
     """
-    MaxHash Sketch.
+    Top sketch.
     """
 
     _anynew = None
@@ -69,7 +69,8 @@ class MaxHashNgramSketch(object):
         - elt: an object as returned by the method `make_elt()` 
 
         Note: This method does not check whether the element is satisfying
-        the MaxHash property.
+        the top-sketch property (that is all elements in the sketch 
+        are the `maxsize` elements with the highest hash values). 
         """
         self._heapset.add(h)
         heappush(self._heap, elt)
@@ -117,7 +118,7 @@ class MaxHashNgramSketch(object):
 
     def add_hashvalues(self, values):
         """
-        Add hash values while conserving the MaxHash characteristic of the set.
+        Add hash values while conserving the top sketch characteristic of the set.
         
         Note: The attribute `nvisited` is not incremented.
 
@@ -237,10 +238,10 @@ class MaxHashNgramSketch(object):
         """
         Update the sketch with elements from `obj` in place (use `__add__` instead to make a copy).
 
-        - obj: An instance of class MaxHashNgramSketch (or an instance of a child class)
+        - obj: An instance of class MaxSketch (or an instance of a child class)
         """
 
-        assert isinstance(obj, MaxHashNgramSketch)
+        assert isinstance(obj, MaxSketch)
         
         if not obj._sketchtype == self._sketchtype:
             raise ValueError("Mismatching sketch type. This is a %s and the update is a %s" % (self._sketchtype,
@@ -317,13 +318,13 @@ class MaxHashNgramSketch(object):
         return iter(sorted(self._heap))
 
     def freeze(self):
-        return FrozenHashNgramSketch(self._heapset, self.nsize, self._hashfun,
-                                     seed = self.seed,
-                                     maxsize = self.maxsize,
-                                     nvisited = self.nvisited)
+        return FrozenSketch(self._heapset, self.nsize, self._hashfun,
+                            seed = self.seed,
+                            maxsize = self.maxsize,
+                            nvisited = self.nvisited)
 
 
-class MinHashNgramSketch(MaxHashNgramSketch):
+class MinSketch(MaxSketch):
     _initheap = 0
     _sketchtype = TYPE_MINHASH
 
@@ -406,10 +407,10 @@ class MinHashNgramSketch(MaxHashNgramSketch):
         """
         Update the sketch with elements from `obj` in place (use `__add__` instead to make a copy).
 
-        - obj: a MinHashNgramSketch (or instance of a child class)
+        - obj: a MinSketch (or instance of a child class)
         """
 
-        assert isinstance(obj, MinHashNgramSketch)
+        assert isinstance(obj, MinSketch)
 
         if hasattr(obj, "nsize") and (self.nsize != obj.nsize):
             raise ValueError("Mismatching 'nsize' (have %i, update has %i)" % (self.nsize, obj.nsize))
@@ -452,9 +453,9 @@ class MinHashNgramSketch(MaxHashNgramSketch):
         self._nvisited += obj.nvisited
 
     
-class MaxHashNgramCountSketch(MaxHashNgramSketch):
+class MaxCountSketch(MaxSketch):
     """
-    MaxHash Sketch where the number of times an hash value was found is stored
+    Top sketch where the number of times an hash value was found is stored
     """
 
     def __init__(self, nsize: int, maxsize: int,
@@ -505,14 +506,14 @@ class MaxHashNgramCountSketch(MaxHashNgramSketch):
             count[k] += obj._count[k]
 
     def freeze(self):
-        return FrozenHashNgramCountSketch(self._heapset, self._count, self._nsize, self._hashfun,
-                                          seed = self.seed,
-                                          maxsize = self.maxsize,
-                                          nvisited = self.nvisited)
+        return FrozenCountSketch(self._heapset, self._count, self._nsize, self._hashfun,
+                                 seed = self.seed,
+                                 maxsize = self.maxsize,
+                                 nvisited = self.nvisited)
 
 
     
-class FrozenHashNgramSketch(object):
+class FrozenSketch(object):
     """
     Read-only sketch.
     """
@@ -568,7 +569,7 @@ class FrozenHashNgramSketch(object):
         return len(self._sketch)
 
 
-class FrozenHashNgramCountSketch(FrozenHashNgramSketch):
+class FrozenCountSketch(FrozenSketch):
 
     def __init__(self, sketch : set, count: Counter, nsize : int,
                  hashfun = hash, seed: int = None,

@@ -4,7 +4,7 @@ This is temporarily here (and in this package) for demonstration purposes.
 
 import argparse
 from mashingpumpkins import _murmurhash3_mash
-from mashingpumpkins.minhashsketch import MinHashNgramSketch
+from mashingpumpkins.minhashsketch import MinSketch
 from mashingpumpkins.parallel import Sketch
 from mashingpumpkins.sequence import chunkpos_iter
 import mashingpumpkins.sourmash
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     else:
         print('The output format "%s" is not yet supported.' % args.output_format)
         
-    cls = MinHashNgramSketch
+    cls = MinSketch
     seed = 42
     hashfun = mashingpumpkins.sourmash.mash_hashfun
 

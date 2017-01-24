@@ -1,7 +1,7 @@
 import sourmash_lib
 import sourmash_lib.signature
 import sourmash_lib._minhash
-from mashingpumpkins.minhashsketch import MinHashNgramSketch
+from mashingpumpkins.minhashsketch import MinSketch
 from mashingpumpkins import _murmurhash3_mash
 from array import array
 
@@ -59,8 +59,8 @@ def to_sourmashsignature(obj,
                          name = '',
                          filename = ''):
     
-    if not isinstance(obj, MinHashNgramSketch):
-        raise ValueError("The obj must be a MinHashNgramSketch.")
+    if not isinstance(obj, MinSketch):
+        raise ValueError("The obj must be a MinSketch.")
 
     if not obj._hashfun is mash_hashfun:
         raise ValueError("The only accepted hash function is %s." % str(mash_hashfun))
@@ -86,6 +86,6 @@ def from_sourmashsignature(obj):
     maxsize = obj.estimator.num
     nsize = obj.estimator.ksize
          
-    res = MinHashNgramSketch(nsize, maxsize, hashfun, seed)
+    res = MinSketch(nsize, maxsize, hashfun, seed)
     res.add_hashvalues(obj.estimator.mh.get_mins())
     return res

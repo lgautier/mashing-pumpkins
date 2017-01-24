@@ -15,7 +15,7 @@ def test_sketch_initializer():
     maxsize = 10
     hashfun = lambda input,width,hashbuffer: None
     seed = 0
-    cls = minhashsketch.MaxHashNgramSketch
+    cls = minhashsketch.MaxSketch
     mashingpumpkins.parallel.Sketch.initializer(cls, nsize, maxsize, hashfun, seed)
     hasattr(mashingpumpkins.parallel, 'sketch_constructor')
     assert type(mashingpumpkins.parallel.sketch_constructor()) is cls
@@ -26,7 +26,7 @@ def test_sketch_map_sequence():
     maxsize = 10
     hashfun = hasharray
     seed = DEFAULT_SEED
-    cls = minhashsketch.MaxHashNgramSketch
+    cls = minhashsketch.MaxSketch
     mashingpumpkins.parallel.Sketch.initializer(cls, nsize, maxsize, hashfun, seed)
 
     random.seed(123)
@@ -43,7 +43,7 @@ def test_sketch_map_sequences():
     maxsize = 10
     hashfun = hasharray
     seed = DEFAULT_SEED
-    cls = minhashsketch.MaxHashNgramSketch
+    cls = minhashsketch.MaxSketch
     mashingpumpkins.parallel.Sketch.initializer(cls, nsize, maxsize, hashfun, seed)
 
     random.seed(123)

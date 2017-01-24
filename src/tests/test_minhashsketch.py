@@ -4,10 +4,10 @@ import random
 import array
 from collections import Counter
 from mashingpumpkins import _murmurhash3, _xxhash
-from mashingpumpkins.minhashsketch import (MaxHashNgramSketch,
-                                           MaxHashNgramCountSketch,
-                                           FrozenHashNgramSketch,
-                                           MinHashNgramSketch)
+from mashingpumpkins.minhashsketch import (MaxSketch,
+                                           MaxCountSketch,
+                                           FrozenSketch,
+                                           MinSketch)
 
 def _allngramshashed(sequence, nsize, hashfun, seed, hashreverse):
     # list with all hash values
@@ -23,9 +23,9 @@ def _allngramshashed(sequence, nsize, hashfun, seed, hashreverse):
     allhash.sort(reverse=hashreverse)
     return allhash
 
-def _test_MinMaxHashNgramSketch_add(sequence, nsize, maxsize, hashfun, seed, cls):
+def _test_MinMaxSketch_add(sequence, nsize, maxsize, hashfun, seed, cls):
 
-    if cls is MaxHashNgramSketch:
+    if cls is MaxSketch:
         hashreverse = True
     else:
         hashreverse = False
@@ -56,7 +56,7 @@ def _test_MinMaxHashNgramSketch_add(sequence, nsize, maxsize, hashfun, seed, cls
     assert len(maxhash ^ mhs._heapset) == 0
 
 
-def _test_MinMaxHashNgramSketch(cls):
+def _test_MinMaxSketch(cls):
     nsize = 3
     maxsize = 10
     hashfun = _murmurhash3.hasharray
@@ -72,16 +72,16 @@ def _test_MinMaxHashNgramSketch(cls):
     assert 123 not in mhs
 
     # with heap
-    mhs = MaxHashNgramSketch(nsize, maxsize, hashfun, seed, heap=list())
+    mhs = MaxSketch(nsize, maxsize, hashfun, seed, heap=list())
     assert len(mhs) == 0
 
-def test_MaxMaxHashNgramSketch():
-    _test_MinMaxHashNgramSketch(MaxHashNgramSketch)
+def test_MaxMaxSketch():
+    _test_MinMaxSketch(MaxSketch)
 
-def test_MinMaxHashNgramSketch():
-    _test_MinMaxHashNgramSketch(MinHashNgramSketch)
+def test_MinMaxSketch():
+    _test_MinMaxSketch(MinSketch)
     
-def _test_MinMaxHashNgramSketch_longer_than_buffer(cls):
+def _test_MinMaxSketch_longer_than_buffer(cls):
     # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
@@ -91,27 +91,27 @@ def _test_MinMaxHashNgramSketch_longer_than_buffer(cls):
                           (_xxhash.hasharray, _xxhash.DEFAULT_SEED)):
         nsize = 21
         maxsize = 10
-        _test_MinMaxHashNgramSketch_add(sequence, nsize, maxsize, hashfun, seed, cls)
+        _test_MinMaxSketch_add(sequence, nsize, maxsize, hashfun, seed, cls)
 
         random.seed(123)
         sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(125))
         nsize = 21
         maxsize = 10
-        _test_MinMaxHashNgramSketch_add(sequence, nsize, maxsize, hashfun, seed, cls)
+        _test_MinMaxSketch_add(sequence, nsize, maxsize, hashfun, seed, cls)
 
         # test with maxsize >> len(sequence)
         nsize = 21
         maxsize = 200
-        _test_MinMaxHashNgramSketch_add(sequence, nsize, maxsize, hashfun, seed, cls)
+        _test_MinMaxSketch_add(sequence, nsize, maxsize, hashfun, seed, cls)
 
 
-def test_MaxHashNgramSketch():
-    _test_MinMaxHashNgramSketch(MaxHashNgramSketch)
+def test_MaxSketch():
+    _test_MinMaxSketch(MaxSketch)
 
-def test_MinHashNgramSketch():
-    _test_MinMaxHashNgramSketch(MinHashNgramSketch)
+def test_MinSketch():
+    _test_MinMaxSketch(MinSketch)
 
-def _test_MinMaxHashNgramSketch_shorter_than_buffer(cls):
+def _test_MinMaxSketch_shorter_than_buffer(cls):
     # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
@@ -119,16 +119,16 @@ def _test_MinMaxHashNgramSketch_shorter_than_buffer(cls):
     maxsize = 10
     for hashfun, seed in ((_murmurhash3.hasharray, _murmurhash3.DEFAULT_SEED),
                           (_xxhash.hasharray, _xxhash.DEFAULT_SEED)):
-        _test_MinMaxHashNgramSketch_add(sequence, nsize, maxsize, hashfun, seed, cls)
+        _test_MinMaxSketch_add(sequence, nsize, maxsize, hashfun, seed, cls)
 
-def test_MaxHashNgramSketch_shorter_than_buffer():
-    _test_MinMaxHashNgramSketch_shorter_than_buffer(MaxHashNgramSketch)
+def test_MaxSketch_shorter_than_buffer():
+    _test_MinMaxSketch_shorter_than_buffer(MaxSketch)
 
-def test_MinHashNgramSketch_shorter_than_buffer():
-    _test_MinMaxHashNgramSketch_shorter_than_buffer(MinHashNgramSketch)
+def test_MinSketch_shorter_than_buffer():
+    _test_MinMaxSketch_shorter_than_buffer(MinSketch)
     
     
-def _test_MinMaxHashNgramSketch_update(sequence, maxsize, methodname, cls):
+def _test_MinMaxSketch_update(sequence, maxsize, methodname, cls):
     # set the hashing function, size of ngrams, max size for the minhash sketch
     hashfun = _murmurhash3.hasharray
     seed = _murmurhash3.DEFAULT_SEED
@@ -173,40 +173,40 @@ def _test_MinMaxHashNgramSketch_update(sequence, maxsize, methodname, cls):
 
     assert len(res._heapset ^ mhs._heapset) == 0
         
-def test_MinMaxHashNgramSketch_update():
+def test_MinMaxSketch_update():
     methodname = 'update'
     # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
     maxsize = 10
-    for cls in (MaxHashNgramSketch, MinHashNgramSketch):
-        _test_MinMaxHashNgramSketch_update(sequence, maxsize, methodname, cls)
+    for cls in (MaxSketch, MinSketch):
+        _test_MinMaxSketch_update(sequence, maxsize, methodname, cls)
 
     maxsize = 150
-    for cls in (MaxHashNgramSketch, MinHashNgramSketch):
-        _test_MinMaxHashNgramSketch_update(sequence, maxsize, methodname, cls)
+    for cls in (MaxSketch, MinSketch):
+        _test_MinMaxSketch_update(sequence, maxsize, methodname, cls)
 
-def test_MaxHashNgramSketch_add():
+def test_MaxSketch_add():
     methodname = '__add__'
     # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
     maxsize = 10
-    for cls in (MaxHashNgramSketch, MinHashNgramSketch):
-        _test_MinMaxHashNgramSketch_update(sequence, maxsize, methodname, cls)
+    for cls in (MaxSketch, MinSketch):
+        _test_MinMaxSketch_update(sequence, maxsize, methodname, cls)
 
     maxsize = 150
-    for cls in (MaxHashNgramSketch, MinHashNgramSketch):
-        _test_MinMaxHashNgramSketch_update(sequence, maxsize, methodname, cls)
+    for cls in (MaxSketch, MinSketch):
+        _test_MinMaxSketch_update(sequence, maxsize, methodname, cls)
 
 
-def _test_MaxHashNgramSketch_add_hashvalues(nsize, maxsize, hashfun, seed):
+def _test_MaxSketch_add_hashvalues(nsize, maxsize, hashfun, seed):
     # random (DNA) sequence
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
     hbuffer = array.array('Q', [0, ])
 
-    mhs_a = MaxHashNgramSketch(nsize, maxsize, hashfun, seed)
+    mhs_a = MaxSketch(nsize, maxsize, hashfun, seed)
     mhs_a.add(sequence)
 
     seq_hash = list()
@@ -218,14 +218,14 @@ def _test_MaxHashNgramSketch_add_hashvalues(nsize, maxsize, hashfun, seed):
     return (sequence, seq_hash, mhs_a)
 
 
-def test_MaxHashNgramSketch_add_hashvalues():
+def test_MaxSketch_add_hashvalues():
 
     nsize = 21
     maxsize=10
     hashfun = _murmurhash3.hasharray
     seed = _murmurhash3.DEFAULT_SEED
-    sequence, seq_hash, mhs_a = _test_MaxHashNgramSketch_add_hashvalues(nsize, maxsize, hashfun, seed)
-    mhs_b = MaxHashNgramSketch(nsize, maxsize, hashfun, seed)
+    sequence, seq_hash, mhs_a = _test_MaxSketch_add_hashvalues(nsize, maxsize, hashfun, seed)
+    mhs_b = MaxSketch(nsize, maxsize, hashfun, seed)
     hbuffer = array.array('Q', [0, ])
 
     mhs_b.add_hashvalues(x[1] for x in seq_hash)
@@ -239,17 +239,17 @@ def test_MaxHashNgramSketch_add_hashvalues():
     assert len(set(x[0] for x in mhs_a) ^ set(x[0] for x in mhs_b)) == 0
 
 
-def test_MaxHashNgramSketch_add_hashvalues_2calls():
+def test_MaxSketch_add_hashvalues_2calls():
 
     nsize = 21
     maxsize=10
     hashfun = _murmurhash3.hasharray
     seed = _murmurhash3.DEFAULT_SEED
-    sequence, seq_hash, mhs_a = _test_MaxHashNgramSketch_add_hashvalues(nsize, maxsize, hashfun, seed)
-    mhs_b = MaxHashNgramSketch(nsize, maxsize, hashfun, seed)
+    sequence, seq_hash, mhs_a = _test_MaxSketch_add_hashvalues(nsize, maxsize, hashfun, seed)
+    mhs_b = MaxSketch(nsize, maxsize, hashfun, seed)
     hbuffer = array.array('Q', [0, ])
 
-    mhs_b = MaxHashNgramSketch(nsize, maxsize, hashfun, seed)
+    mhs_b = MaxSketch(nsize, maxsize, hashfun, seed)
     hbuffer = array.array('Q', [0, ])
     i = 3
     mhs_b.add_hashvalues(x[1] for x in seq_hash[:i])
@@ -269,44 +269,44 @@ def test_MaxHashNgramSketch_add_hashvalues_2calls():
     assert len(set(x[0] for x in mhs_a) ^ set(x[0] for x in mhs_b)) == 0
 
 
-def test_MaxHashNgramCountSketch():
+def test_MaxCountSketch():
 
     hashfun = _murmurhash3.hasharray
     seed = _murmurhash3.DEFAULT_SEED
     
     nsize = 2
     maxsize = 10
-    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed)
+    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed)
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
 
     nsize = 2
     maxsize = 10
-    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed, count=Counter())
+    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed, count=Counter())
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
 
     # invalid count
     with pytest.raises(ValueError):
-        mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed, count=Counter([(213, 'AA')]))
+        mhs = MaxCountSketch(nsize, maxsize, hashfun, seed, count=Counter([(213, 'AA')]))
 
     # valid heap
-    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed, heap=[])
+    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed, heap=[])
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
     
     # invalid heap
     with pytest.raises(ValueError):
-        mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed, heap=[(1, 'A'),(1, 'B')])
+        mhs = MaxCountSketch(nsize, maxsize, hashfun, seed, heap=[(1, 'A'),(1, 'B')])
 
     # invalid count/heap combo
     with pytest.raises(ValueError):
-        mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed,
+        mhs = MaxCountSketch(nsize, maxsize, hashfun, seed,
                                       heap=[(1, 'A'),(1, 'B')],
                                       count=Counter([(213, 'AA')]))
 
     
-def test_MaxHashNgramCountSketch_add():
+def test_MaxCountSketch_add():
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
@@ -315,7 +315,7 @@ def test_MaxHashNgramCountSketch_add():
 
     nsize = 2
     maxsize = 10
-    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed)
+    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed)
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
     
@@ -345,7 +345,7 @@ def test_MaxHashNgramCountSketch_add():
     #FIXME: add test for .update
 
 
-def test_MaxHashNgramCountSketch_freeze():
+def test_MaxCountSketch_freeze():
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
@@ -354,7 +354,7 @@ def test_MaxHashNgramCountSketch_freeze():
 
     nsize = 2
     maxsize = 10
-    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed)
+    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed)
     mhs.add(sequence)
 
     fmhs = mhs.freeze()
@@ -365,7 +365,7 @@ def test_MaxHashNgramCountSketch_freeze():
     assert len(mhs._heapset ^ fmhs._sketch) == 0
 
 
-def test_MaxHashNgramCountSketch_update():
+def test_MaxCountSketch_update():
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
@@ -374,15 +374,15 @@ def test_MaxHashNgramCountSketch_update():
     nsize = 2
     maxsize = 10
 
-    mhs = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed)
+    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed)
     mhs.add(sequence)
     
-    mhs_a = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed)
+    mhs_a = MaxCountSketch(nsize, maxsize, hashfun, seed)
     i = len(sequence)//2
     mhs_a.add(sequence[:i])
     assert mhs_a.nvisited == (i-nsize+1)
 
-    mhs_b = MaxHashNgramCountSketch(nsize, maxsize, hashfun, seed)
+    mhs_b = MaxCountSketch(nsize, maxsize, hashfun, seed)
     mhs_b.add(sequence[(i-nsize+1):])
     assert mhs_b.nvisited == (len(sequence)-i)
     
@@ -402,21 +402,21 @@ def test_MaxHashNgramCountSketch_update():
     for h, value in mhs_a._count.items():
         assert allcounthash[h] == value
     
-def test_FrozenHashNgramSketch():
+def test_FrozenSketch():
     
     nsize = 2
     maxsize = 5
     sketch = set((1,2,3,4,5))
     nvisited = len(sketch)
     
-    mhs = FrozenHashNgramSketch(sketch, nsize, maxsize = maxsize, nvisited=nvisited)
+    mhs = FrozenSketch(sketch, nsize, maxsize = maxsize, nvisited=nvisited)
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
     assert mhs.nvisited == nvisited
     assert len(mhs) == maxsize
     assert len(mhs._sketch) == maxsize
 
-    mhs = FrozenHashNgramSketch(sketch, nsize)
+    mhs = FrozenSketch(sketch, nsize)
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
     assert mhs.nvisited == nvisited
@@ -425,15 +425,15 @@ def test_FrozenHashNgramSketch():
 
     assert mhs.jaccard(mhs) == 1
     sketch = set((1,2,3,6,7))
-    mhs_b = FrozenHashNgramSketch(sketch, nsize, maxsize = maxsize, nvisited=len(sketch))
+    mhs_b = FrozenSketch(sketch, nsize, maxsize = maxsize, nvisited=len(sketch))
     assert mhs.jaccard(mhs_b) == 3/7
     
     # invalid maxsize
     with pytest.raises(ValueError):
-        mhs = FrozenHashNgramSketch(sketch, nsize, maxsize = len(sketch)-1)
+        mhs = FrozenSketch(sketch, nsize, maxsize = len(sketch)-1)
 
     # invalid nvisited
     with pytest.raises(ValueError):
-        mhs = FrozenHashNgramSketch(sketch, nsize, nvisited = len(sketch)-1)
+        mhs = FrozenSketch(sketch, nsize, nvisited = len(sketch)-1)
 
 

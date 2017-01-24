@@ -1,6 +1,6 @@
 import pytest
 
-from mashingpumpkins.minhashsketch import MinHashNgramSketch
+from mashingpumpkins.minhashsketch import MinSketch
 
 try:
     from mashingpumpkins.sourmash import (to_sourmashsignature,
@@ -22,17 +22,17 @@ def test_to_sourmashsignature_and_back():
     seed = DEFAULT_SEED
     
     # invalid hashfun
-    mhns = MinHashNgramSketch(nsize, maxsize, lambda x,y,z:0, seed)
+    mhns = MinSketch(nsize, maxsize, lambda x,y,z:0, seed)
     with pytest.raises(ValueError):
         sms = to_sourmashsignature(mhns)
         
     # invalid seed
-    mhns = MinHashNgramSketch(nsize, maxsize, lambda x,y,z:0, seed+1)
+    mhns = MinSketch(nsize, maxsize, lambda x,y,z:0, seed+1)
     with pytest.raises(ValueError):
         sms = to_sourmashsignature(mhns)
         
     sequence = b'AAATTTTCCCC'
-    mhns = MinHashNgramSketch(nsize, maxsize, mash_hashfun, seed)
+    mhns = MinSketch(nsize, maxsize, mash_hashfun, seed)
     mhns.add(sequence)
     
     sms = to_sourmashsignature(mhns)
