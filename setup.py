@@ -20,7 +20,7 @@ CLASSIFIERS = [
 ]
 
 if sys.platform == 'darwin':
-    warnings.warn("Not tested on OSX")
+    warnings.warn("Not tested on OSX. Feedback welcome.")
     pass
 elif sys.platform == 'linux':
     pass
@@ -65,7 +65,7 @@ setup(
     package_dir = {PACKAGENAME: 'src'},
     ext_modules = [mmh_mod, mmhmash_mod, xxh_mod],
     extras_require = {
-        'test' : ['sourmash'],
+        'test' : ['pytest', 'sourmash'],
         'demo' : ['sourmash']},
     classifiers = CLASSIFIERS)
 
