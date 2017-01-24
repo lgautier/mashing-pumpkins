@@ -55,3 +55,29 @@ def test_sketch_map_sequences():
     assert mhs.maxsize == maxsize
     assert mhs.nvisited == len(sequence)-nsize+1
 
+def test_sketch_reduce_sketches():
+
+    nsize = 21
+    maxsize = 10
+    hashfun = hasharray
+    seed = DEFAULT_SEED
+    cls = minhashsketch.MaxSketch
+
+    mhs = cls(nsize, maxsize, hashfun, seed)
+    mhs_a = cls(nsize, maxsize, hashfun, seed)
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
+    mhs.add(sequence)
+    mhs_a.add(sequence)
+
+    mhs_b = cls(nsize, maxsize, hashfun, seed)
+    random.seed(123)
+    sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(250))
+    mhs.add(sequence)
+    mhs_b.add(sequence)
+
+    mhs_ab = mashingpumpkins.parallel.Sketch.reduce(mhs_a, mhs_b)
+    assert mhs.nsize == mhs_ab.nsize
+    assert mhs.maxsize == mhs_ab.maxsize
+    assert mhs.nvisited == mhs_ab.nvisited
+    assert len(mhs._heapset ^ mhs_ab._heapset) == 0
