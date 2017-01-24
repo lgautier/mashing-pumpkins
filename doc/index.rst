@@ -189,9 +189,40 @@ classes relatively lean.
    :exclude-members: __module__
 
       
-Using parallelization
----------------------
+Parallelization utilities
+-------------------------
 
+This module suggests primitives to write code performing parallel computation.
+
+For example using :mod:`multiprocessing` to build in parallel a sketch
+for a list of large sequences (e.g., the chromosomes in a genome):
+
+.. code-block:: python
+
+   import multiprocessing
+   from mashingpumpkins.minhashsketch import MinSketch
+   from mashingpumpkins.sourmash import mash_hashfun, DEFAULT_SEED
+   from mashingpumpkins import parallel
+
+   ncpu = 4
+   
+   ksize = 31
+   maxsize = 1000
+   # create child processes
+   p = multiprocessing.Pool(ncpu,
+                            initializer=parallel.Sketch.initializer,
+                            initargs=(MinSketch, ksize, maxsize,
+                                      mash_hashfun, DEFAULT_SEED))
+   # map the list of sequences
+   result = p.imap_unordered(Sketch.map_sequence,
+                             sequences)
+   # reduce into a result sketch
+   mhs = reduce(Sketch.reduce, result,
+                MinHash(ksize, maxsize, mash_hashfun, DEFAULT_SEED))
+   # finalize the child processes
+   p.finalize()
+
+   
 .. automodule:: mashingpumpkins.parallel
    :members:
 
