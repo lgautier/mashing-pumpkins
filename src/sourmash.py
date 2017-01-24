@@ -22,21 +22,42 @@ for x,y in zip(b'ATGC', b'ATGC'):
     sourmashmaskatgc_tbl[x] = y
 
 def revcomp(sequence):
+    """
+    Compute the reverse-complement of a DNA sequence
+    (the sequence is reversed and the nucleic acids are
+    translated into their complement
+    (A=>T, T=>A, G=>C, C=>G). 
+    """
     ba = bytearray(sequence)
     ba.reverse()
     ba = ba.translate(compl_tbl)
     return ba
 
-def mash_hashfun(sequence, nsize, buffer=array('Q', [0,]*300), seed=DEFAULT_SEED):
+def mash_hashfun(sequence,
+                 nsize: int,
+                 buffer = array('Q', [0,]*300),
+                 seed: int = DEFAULT_SEED):
+    """
+    Hashing function that performs hashing the MASH/sourmash way. The input sequence
+    is first going through a translation table where any byte in the sequence not in
+    {A, T, G, C} is set to zero. The sequence is then going through the hashing function
+    `_murmurhash3_mash.hasharray_withrc()`.
+
+    - sequence: a bytes-like object
+    - nsize: the k in "kmer"
+    - buffer: a buffer to store hash values
+    - seed: an integer
+
+"""
     sequence = sequence.translate(sourmashmaskatgc_tbl)
     res =  _murmurhash3_mash.hasharray_withrc(sequence, revcomp(sequence), nsize, buffer, seed)
     return res
 
 def to_sourmashsignature(obj,
-                         is_protein=False,
-                         email=None,
-                         name='',
-                         filename=''):
+                         is_protein = False,
+                         email = None,
+                         name = '',
+                         filename = ''):
     
     if not isinstance(obj, MinHashNgramSketch):
         raise ValueError("The obj must be a MinHashNgramSketch.")
