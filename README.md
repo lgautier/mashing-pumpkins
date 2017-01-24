@@ -1,3 +1,4 @@
+[![logo](doc/_static/mashingpumpkins.png)](doc/_static/mashingpumpkins.png)
 # mashing-pumpkins
 
 Convenient-yet-pretty-fast minhashing-related miscellanea for Python >= 3.5.
