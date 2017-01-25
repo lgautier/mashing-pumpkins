@@ -192,9 +192,22 @@ Each one of these method contain very little code, and the design made to allow 
 additional operations (the methods call the parent class' method, and the added part concern the update of a
 :class:`collections.Counter` to keep track of the number of times a hash values has been seen so far).
 
-The expected benefit is too allow explorations in child classes or other additional structures while keeping the core
-classes relatively lean.
+The handling of counting is gathered in the class :class:`mashingpumpkins.minhashsketch.CountTrait` and is used
+by :class:`mashingpumpkins.minhashsketch.MaxCountSketch` and :class:`mashingpumpkins.minhashsketch.MinCountSketch`.
       
+
+The expected benefit is too allow exploration in child classes or other additional structures while keeping the core
+classes relatively lean.
+
+
+.. autoclass:: mashingpumpkins.minhashsketch.CountTrait
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+   :exclude-members: __module__, __dict__, __weakref__
+
 .. autoclass:: mashingpumpkins.minhashsketch.MaxCountSketch
    :show-inheritance:
    :members:
@@ -202,12 +215,19 @@ classes relatively lean.
    :private-members:
    :special-members:
    :exclude-members: __module__
+		     
+.. autoclass:: mashingpumpkins.minhashsketch.MinCountSketch
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+   :exclude-members: __module__
 
+.. _parallel:
       
 Parallelization utilities
 -------------------------
-
-.. _parallel:
 
 This module suggests primitives to write code performing parallel computation.
 
