@@ -575,6 +575,8 @@ class FrozenSketch(object):
     Read-only sketch.
     """
 
+    __slots__ = '_sketch', '_nsize', '_hashfun', '_seed', '_maxsize', '_nvisited'
+    
     def __init__(self, sketch : set, nsize : int, hashfun = hash, seed: int = None, maxsize : int = None, nvisited: int = None):
         """
         Create an instance from:
@@ -635,6 +637,8 @@ class FrozenSketch(object):
 
 class FrozenCountSketch(FrozenSketch):
 
+    __slots__ = '_count'
+    
     def __init__(self, sketch : set, count: Counter, nsize : int,
                  hashfun = hash, seed: int = None,
                  maxsize : int = None, nvisited: int = None):

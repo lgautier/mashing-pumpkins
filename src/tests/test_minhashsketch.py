@@ -7,6 +7,7 @@ from mashingpumpkins import _murmurhash3, _xxhash
 from mashingpumpkins.minhashsketch import (MaxSketch,
                                            MaxCountSketch,
                                            FrozenSketch,
+                                           FrozenCountSketch,
                                            MinSketch,
                                            MinCountSketch)
 
@@ -460,5 +461,42 @@ def test_FrozenSketch():
     # invalid nvisited
     with pytest.raises(ValueError):
         mhs = FrozenSketch(sketch, nsize, nvisited = len(sketch)-1)
+
+def test_FrozenCountSketch():
+    
+    nsize = 2
+    maxsize = 5
+    sketch = set((1,2,3,4,5))
+    count = Counter()
+    for elt in sketch:
+        count[elt] = elt*2
+    nvisited = len(sketch)
+    
+    mhs = FrozenCountSketch(sketch, count, nsize, maxsize = maxsize, nvisited=nvisited)
+    assert mhs.maxsize == maxsize
+    assert mhs.nsize == nsize
+    assert mhs.nvisited == nvisited
+    assert len(mhs) == maxsize
+    assert len(mhs._sketch) == maxsize
+
+    mhs = FrozenCountSketch(sketch, count, nsize)
+    assert mhs.maxsize == maxsize
+    assert mhs.nsize == nsize
+    assert mhs.nvisited == nvisited
+    assert len(mhs) == maxsize
+    assert len(mhs._sketch) == maxsize
+
+    assert mhs.jaccard_similarity(mhs) == 1
+    sketch = set((1,2,3,6,7))
+    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize = maxsize, nvisited=len(sketch))
+    assert mhs.jaccard_similarity(mhs_b) == 3/7
+    
+    # invalid maxsize
+    with pytest.raises(ValueError):
+        mhs = FrozenCountSketch(sketch, count, nsize, maxsize = len(sketch)-1)
+
+    # invalid nvisited
+    with pytest.raises(ValueError):
+        mhs = FrozenCountSketch(sketch, count, nsize, nvisited = len(sketch)-1)
 
 
