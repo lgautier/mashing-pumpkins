@@ -328,7 +328,7 @@ class MaxSketch(object):
 class MinSketch(MaxSketch):
 
     """
-    Top sketch, which contains a sample of the input set constituted of the `maxsize` elements with the highest
+    Bottom sketch, which contains a sample of the input set constituted of the `maxsize` elements with the lowest
     hash values.
     """
     
