@@ -449,11 +449,28 @@ def test_FrozenSketch():
     assert len(mhs) == maxsize
     assert len(mhs._sketch) == maxsize
 
-    assert mhs.jaccard_similarity(mhs) == 1
     sketch = set((1,2,3,6,7))
+    
+    # jaccard_similarity
+    assert mhs.jaccard_similarity(mhs) == 1
     mhs_b = FrozenSketch(sketch, nsize, maxsize = maxsize, nvisited=len(sketch))
     assert mhs.jaccard_similarity(mhs_b) == 3/7
     
+    # jaccard_correspondance
+    assert mhs.jaccard_correspondance(mhs) == 1
+    mhs_b = FrozenSketch(sketch, nsize, maxsize = maxsize, nvisited=len(sketch))
+    assert mhs.jaccard_correspondance(mhs_b) == 3/7
+    
+    # jaccard_containment
+    assert mhs.jaccard_containment(mhs) == 1
+    mhs_b = FrozenSketch(sketch, nsize, maxsize = maxsize, nvisited=len(sketch))
+    assert mhs.jaccard_containment(mhs_b) == 3/5
+
+    # dice_similarity
+    assert mhs.dice_similarity(mhs) == 1
+    mhs_b = FrozenSketch(sketch, nsize, maxsize = maxsize, nvisited=len(sketch))
+    assert mhs.dice_similarity(mhs_b) == 3/5
+
     # invalid maxsize
     with pytest.raises(ValueError):
         mhs = FrozenSketch(sketch, nsize, maxsize = len(sketch)-1)
@@ -486,11 +503,28 @@ def test_FrozenCountSketch():
     assert len(mhs) == maxsize
     assert len(mhs._sketch) == maxsize
 
-    assert mhs.jaccard_similarity(mhs) == 1
     sketch = set((1,2,3,6,7))
+    
+    # jaccard_similarity
+    assert mhs.jaccard_similarity(mhs) == 1
     mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize = maxsize, nvisited=len(sketch))
     assert mhs.jaccard_similarity(mhs_b) == 3/7
     
+    # jaccard_correspondance
+    assert mhs.jaccard_correspondance(mhs) == 1
+    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize = maxsize, nvisited=len(sketch))
+    assert mhs.jaccard_correspondance(mhs_b) == 3/7
+
+    # jaccard_containment
+    assert mhs.jaccard_containment(mhs) == 1
+    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize = maxsize, nvisited=len(sketch))
+    assert mhs.jaccard_containment(mhs_b) == 3/5
+
+    # dice_similarity
+    assert mhs.dice_similarity(mhs) == 1
+    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize = maxsize, nvisited=len(sketch))
+    assert mhs.dice_similarity(mhs_b) == 3/5
+
     # invalid maxsize
     with pytest.raises(ValueError):
         mhs = FrozenCountSketch(sketch, count, nsize, maxsize = len(sketch)-1)

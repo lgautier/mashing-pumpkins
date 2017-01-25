@@ -636,8 +636,8 @@ class FrozenSketch(object):
         DSC = 2q / (2q + r + s)
         """
         q = len(self._sketch.intersection(obj._sketch))
-        r = len(self._sketch.setdiff(obj._sketch))
-        s = len(obj._sketch.setdiff(self._sketch))
+        r = len(self._sketch.difference(obj._sketch))
+        s = len(obj._sketch.difference(self._sketch))
         return 2*q / (2*q + r + s)
 
     def __len__(self):
