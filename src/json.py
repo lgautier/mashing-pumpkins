@@ -1,5 +1,5 @@
 #import ijson
-import jsonschema
+#import jsonschema
 
 
 msg = 'This is not yet implemented'
