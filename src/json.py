@@ -2,11 +2,13 @@ import ijson
 import jsonschema
 
 
+msg = 'This is not yet implemented'
+
 def validate(sketch):
     """
     - sketch: a `dict`
     """
-    pass
+    raise NotImplementedError(msg)
 
 def readsketch_iter(iterable):
     """
@@ -14,11 +16,11 @@ def readsketch_iter(iterable):
 
     Returns a `dict` with a sketch information
     """
-    pass
+    raise NotImplementedError(msg)
 
 def readjamschema(schema):
     """
     Read a JAM definition schema
     """
-    pass
+    raise NotImplementedError(msg)
     
