@@ -626,9 +626,19 @@ class FrozenSketch(object):
     # Alias for `jaccard_similarity`
     jaccard_correspondance = jaccard_similarity
     
-    def jaccard_inclusion(self, obj):
-        """ Compute the Jaccard inclusion index between this sketch and an other sketch"""
+    def jaccard_containment(self, obj):
+        """ Compute the Jaccard containment index between this sketch and an other sketch"""
         return len(self._sketch.intersection(obj._sketch)) /  len(self._sketch)
+
+    def dice_similarity(self, obj):
+        """
+        Soerensen-Dice similarity index as:
+        DSC = 2q / (2q + r + s)
+        """
+        q = len(self._sketch.intersection(obj._sketch))
+        r = len(self._sketch.setdiff(obj._sketch))
+        s = len(obj._sketch.setdiff(self._sketch))
+        return 2*q / (2*q + r + s)
 
     def __len__(self):
         """ Return the number of elements in the set. """
