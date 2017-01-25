@@ -1,0 +1,3 @@
+include README.md LICENSE
+
+include src/MurmurHash3.h src/xxhash.h

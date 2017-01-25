@@ -5,7 +5,7 @@ import warnings
 
 PYPINAME = "mashing-pumpkins"
 PACKAGENAME = "mashingpumpkins"
-VERSION="0.1.1"
+VERSION="0.1.2"
 
 extra_compile_args = ['-pedantic']
 
@@ -30,6 +30,7 @@ else:
 
 mmh_mod = Extension("%s._murmurhash3" % PACKAGENAME,
                     sources=["src/_murmurhash3.cpp", "src/MurmurHash3.cpp"],
+                    depends=["src/MurmurHash3.h"],
                     include_dirs=["src",],
                     language="c++",
                     extra_compile_args = extra_compile_args + \
@@ -37,6 +38,7 @@ mmh_mod = Extension("%s._murmurhash3" % PACKAGENAME,
 
 mmhmash_mod = Extension("%s._murmurhash3_mash" % PACKAGENAME,
                         sources=["src/_murmurhash3_mash.cpp", "src/MurmurHash3.cpp"],
+                        depends=["src/MurmurHash3.h"],
                         include_dirs=["src",],
                         language="c++",
                         extra_compile_args = extra_compile_args + \
@@ -44,6 +46,7 @@ mmhmash_mod = Extension("%s._murmurhash3_mash" % PACKAGENAME,
 
 xxh_mod = Extension("%s._xxhash" % PACKAGENAME,
                     sources=["src/_xxhash.c", "src/xxhash.c"],
+                    depends=["src/xxhash.h"],
                     include_dirs=["src",],
                     language="c",
                     extra_compile_args = extra_compile_args + \
