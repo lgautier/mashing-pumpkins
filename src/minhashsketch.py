@@ -666,3 +666,12 @@ class FrozenCountSketch(FrozenSketch):
         super().__init__(sketch, nsize, hashfun = hashfun, seed = seed,
                          maxsize = maxsize, nvisited = nvisited)
         self._count = count.copy()
+
+    def bray_curtis_dissimilarity(self, obj):
+        """
+        Return the Bray-Curtis dissimilarity between this and an other FrozenCountSketch.
+        """
+        C_ij = sum(self._count[h] for h in self._sketch.intersection(obj._sketch))
+        S_i = sum(self._count)
+        S_j = sum(obj._count)
+        return 1 - (2 * C_ij) / (S_i + S_j)
