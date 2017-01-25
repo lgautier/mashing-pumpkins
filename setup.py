@@ -5,7 +5,7 @@ import warnings
 
 PYPINAME = "mashing-pumpkins"
 PACKAGENAME = "mashingpumpkins"
-VERSION="0.1.2"
+VERSION="0.1.3"
 
 extra_compile_args = ['-pedantic']
 
@@ -63,6 +63,7 @@ setup(
     license = "MIT",
     author = "Laurent Gautier",
     author_email = "lgautier@gmail.com",
+    url = "https://github.com/lgautier/mashing-pumpkins",
     packages = [PACKAGENAME,
                 PACKAGENAME + '.tests',
                 PACKAGENAME + '.demo'],
