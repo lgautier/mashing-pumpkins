@@ -10,7 +10,8 @@ TYPE_MINHASH = 1
 class MaxSketch(object):
     
     """
-    Top sketch.
+    Top sketch, which contains a sample of the input set constituted of the `maxsize` elements with the highest
+    hash values.
     """
 
     _anynew = None
@@ -325,11 +326,22 @@ class MaxSketch(object):
 
 
 class MinSketch(MaxSketch):
+
+    """
+    Top sketch, which contains a sample of the input set constituted of the `maxsize` elements with the highest
+    hash values.
+    """
+    
     _initheap = 0
     _sketchtype = TYPE_MINHASH
 
     @staticmethod
     def _extracthash(heaptop):
+        """
+        Extract the hash value for an element (see method `_make_elt()`). This is overriding the parent class' method
+        by returning the opposite value (the parent class build top-sketches, taking the opposite
+        allows us to reuse a lot of the code).
+        """
         return - heaptop[0]
 
     @staticmethod
@@ -360,10 +372,7 @@ class MinSketch(MaxSketch):
     def _add(self, subs, nsubs, hashbuffer, heaptop,
              extracthash, make_elt, replace, anynew) -> int:
         """
-        Process/add elements to the sketch.
-
-        If calling this method directly, updating the attribute
-        `nvisited` is under your responsibility.
+        Process/add elements to the sketch (See warning below).
 
         - subs: (sub-)sequence
         - nsubs: number of hash values in the hashbuffer
@@ -373,6 +382,12 @@ class MinSketch(MaxSketch):
         - make_elt:
         - replace:
         - anynew:
+
+        .. warning::
+
+           If calling this method directly, updating the attribute
+           `nvisited` is under your responsibility.
+
         """
 
         nsize = self._nsize
@@ -452,8 +467,37 @@ class MinSketch(MaxSketch):
 
         self._nvisited += obj.nvisited
 
+
+class CountTrait(object):
+    """
+    methods for sketches counting the number of occurences of hash values in the input set / sequence.
+    """
     
-class MaxCountSketch(MaxSketch):
+    def _replace(self, h, elt):
+        out = super()._replace(h, elt)
+        del(self._count[self._extracthash(out)])
+        return out
+
+    def _anynew(self, h):
+        self._count[h] += 1
+
+    def update(self, obj):
+        """
+        In addition to the parent class' method `update()`, this is ensuring that the counts are properly updated.
+        """
+        super().update(obj)
+        count = self._count
+        for k in self._heapset:
+            count[k] += obj._count[k]
+
+    def freeze(self):
+        return FrozenCountSketch(self._heapset, self._count, self._nsize, self._hashfun,
+                                 seed = self.seed,
+                                 maxsize = self.maxsize,
+                                 nvisited = self.nvisited)
+
+
+class MaxCountSketch(MaxSketch, CountTrait):
     """
     Top sketch where the number of times an hash value was found is stored
     """
@@ -488,28 +532,41 @@ class MaxCountSketch(MaxSketch):
                 raise ValueError("Mismatching keys with the parameter 'count'.")
         self._count = count
 
-    def _replace(self, h, elt):
-        out = super()._replace(h, elt)
-        del(self._count[self._extracthash(out)])
-        return out
+# FIXME: code duplication with MaxCountSketch - may be using __new__() would solve this.
+class MinCountSketch(MinSketch, CountTrait):
+    """
+    Top sketch where the number of times an hash value was found is stored
+    """
 
-    def _anynew(self, h):
-        self._count[h] += 1
-
-    def update(self, obj):
+    def __init__(self, nsize: int, maxsize: int,
+                 hashfun, seed: int,
+                 heap : list = None,
+                 count : Counter = None,
+                 nvisited: int = 0):
         """
-        In addition to the parent class' method `update()`, this is ensuring that the counts are properly updated.
+        - nsize: size of the ngrams / kmers
+        - maxsize: maximum size for the sketch
+        - hashfun: function used for hashing - `hashfun(byteslike) -> hash value`
+        - seed: a seed for hashfun
+        - heap: heapified list (if unsure about what it is, don't change the default)
+        - count: a collections.Counter
+        - nvisited: number of kmers visited so far
         """
-        super().update(obj)
-        count = self._count
-        for k in self._heapset:
-            count[k] += obj._count[k]
-
-    def freeze(self):
-        return FrozenCountSketch(self._heapset, self._count, self._nsize, self._hashfun,
-                                 seed = self.seed,
-                                 maxsize = self.maxsize,
-                                 nvisited = self.nvisited)
+        super().__init__(nsize, maxsize, hashfun, seed,
+                         heap = heap, nvisited = nvisited)
+        if count is None:
+            count = Counter()
+            if heap is not None:
+                for elt in heap:
+                    h = self._extracthash(elt)
+                    if h in count:
+                        raise ValueError('Elements in the heap must be unique.')
+                    else:
+                        count[h] = 1
+        else:
+            if len(self._heapset ^ set(count.keys())) > 0:
+                raise ValueError("Mismatching keys with the parameter 'count'.")
+        self._count = count
 
 
     

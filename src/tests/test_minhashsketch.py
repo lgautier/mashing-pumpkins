@@ -7,7 +7,8 @@ from mashingpumpkins import _murmurhash3, _xxhash
 from mashingpumpkins.minhashsketch import (MaxSketch,
                                            MaxCountSketch,
                                            FrozenSketch,
-                                           MinSketch)
+                                           MinSketch,
+                                           MinCountSketch)
 
 def _allngramshashed(sequence, nsize, hashfun, seed, hashreverse):
     # list with all hash values
@@ -269,44 +270,49 @@ def test_MaxSketch_add_hashvalues_2calls():
     assert len(set(x[0] for x in mhs_a) ^ set(x[0] for x in mhs_b)) == 0
 
 
-def test_MaxCountSketch():
+def _test_CountSketch(cls):
 
     hashfun = _murmurhash3.hasharray
     seed = _murmurhash3.DEFAULT_SEED
     
     nsize = 2
     maxsize = 10
-    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed)
+    mhs = cls(nsize, maxsize, hashfun, seed)
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
 
     nsize = 2
     maxsize = 10
-    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed, count=Counter())
+    mhs = cls(nsize, maxsize, hashfun, seed, count=Counter())
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
 
     # invalid count
     with pytest.raises(ValueError):
-        mhs = MaxCountSketch(nsize, maxsize, hashfun, seed, count=Counter([(213, 'AA')]))
+        mhs = cls(nsize, maxsize, hashfun, seed, count=Counter([(213, 'AA')]))
 
     # valid heap
-    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed, heap=[])
+    mhs = cls(nsize, maxsize, hashfun, seed, heap=[])
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
     
     # invalid heap
     with pytest.raises(ValueError):
-        mhs = MaxCountSketch(nsize, maxsize, hashfun, seed, heap=[(1, 'A'),(1, 'B')])
+        mhs = cls(nsize, maxsize, hashfun, seed, heap=[(1, 'A'),(1, 'B')])
 
     # invalid count/heap combo
     with pytest.raises(ValueError):
-        mhs = MaxCountSketch(nsize, maxsize, hashfun, seed,
-                                      heap=[(1, 'A'),(1, 'B')],
-                                      count=Counter([(213, 'AA')]))
+        mhs = cls(nsize, maxsize, hashfun, seed,
+                  heap=[(1, 'A'),(1, 'B')],
+                  count=Counter([(213, 'AA')]))
 
-    
-def test_MaxCountSketch_add():
+def test_MaxCountSketch():
+    _test_CountSketch(MaxCountSketch)
+
+def test_MinCountSketch():
+    _test_CountSketch(MinCountSketch)
+
+def _test_CountSketch_add(cls, reverse):
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
@@ -315,7 +321,7 @@ def test_MaxCountSketch_add():
 
     nsize = 2
     maxsize = 10
-    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed)
+    mhs = cls(nsize, maxsize, hashfun, seed)
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
     
@@ -328,7 +334,7 @@ def test_MaxCountSketch_add():
         ngram = sequence[i:(i+nsize)]
         hashfun(ngram, nsize, hbuffer, seed)
         allcounthash[hbuffer[0]] += 1
-    maxhash = sorted(allcounthash.keys(), reverse=True)[:maxsize]
+    maxhash = sorted(allcounthash.keys(), reverse=reverse)[:maxsize]
     assert len(set(maxhash) ^ mhs._heapset) == 0
 
     for h, value in mhs._count.items():
@@ -344,8 +350,14 @@ def test_MaxCountSketch_add():
     #FIXME: add test for .add_hashvalues
     #FIXME: add test for .update
 
+def test_MaxCountSketch_add():
+    _test_CountSketch_add(MaxCountSketch, True)
 
-def test_MaxCountSketch_freeze():
+def test_MinCountSketch_add():
+    _test_CountSketch_add(MinCountSketch, False)
+
+
+def _test_CountSketch_freeze(cls):
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
@@ -354,7 +366,7 @@ def test_MaxCountSketch_freeze():
 
     nsize = 2
     maxsize = 10
-    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed)
+    mhs = cls(nsize, maxsize, hashfun, seed)
     mhs.add(sequence)
 
     fmhs = mhs.freeze()
@@ -364,8 +376,14 @@ def test_MaxCountSketch_freeze():
 
     assert len(mhs._heapset ^ fmhs._sketch) == 0
 
+def test_MaxCountSketch_freeze():
+    _test_CountSketch_freeze(MaxCountSketch)
 
-def test_MaxCountSketch_update():
+def test_MinCountSketch_freeze():
+    _test_CountSketch_freeze(MinCountSketch)
+
+
+def _test_CountSketch_update(cls, reverse):
     random.seed(123)
     sequence = b''.join(random.choice((b'A',b'T',b'G',b'C')) for x in range(50))
 
@@ -374,15 +392,15 @@ def test_MaxCountSketch_update():
     nsize = 2
     maxsize = 10
 
-    mhs = MaxCountSketch(nsize, maxsize, hashfun, seed)
+    mhs = cls(nsize, maxsize, hashfun, seed)
     mhs.add(sequence)
     
-    mhs_a = MaxCountSketch(nsize, maxsize, hashfun, seed)
+    mhs_a = cls(nsize, maxsize, hashfun, seed)
     i = len(sequence)//2
     mhs_a.add(sequence[:i])
     assert mhs_a.nvisited == (i-nsize+1)
 
-    mhs_b = MaxCountSketch(nsize, maxsize, hashfun, seed)
+    mhs_b = cls(nsize, maxsize, hashfun, seed)
     mhs_b.add(sequence[(i-nsize+1):])
     assert mhs_b.nvisited == (len(sequence)-i)
     
@@ -394,14 +412,21 @@ def test_MaxCountSketch_update():
         ngram = sequence[i:(i+nsize)]
         hashfun(ngram, nsize, hbuffer, seed)
         allcounthash[hbuffer[0]] += 1
-    maxhash = sorted(allcounthash.keys(), reverse=True)[:maxsize]
+    maxhash = sorted(allcounthash.keys(), reverse=reverse)[:maxsize]
 
     
     assert len(set(maxhash) ^ mhs_a._heapset) == 0
 
     for h, value in mhs_a._count.items():
         assert allcounthash[h] == value
-    
+
+def test_MaxCountSketch_update():
+    _test_CountSketch_update(MaxCountSketch, True)
+
+def test_MinCountSketch_update():
+    _test_CountSketch_update(MinCountSketch, False)
+
+
 def test_FrozenSketch():
     
     nsize = 2
