@@ -5,6 +5,7 @@ Convenient-yet-pretty-fast minhashing-related miscellanea for Python >= 3.5.
 
 [![Build Status](https://travis-ci.org/lgautier/mashing-pumpkins.svg?branch=master)](https://travis-ci.org/lgautier/mashing-pumpkins)
 [![codecov](https://codecov.io/gh/lgautier/mashing-pumpkins/branch/master/graph/badge.svg)](https://codecov.io/gh/lgautier/mashing-pumpkins)
+[![Pypi release](https://img.shields.io/pypi/v/mashing-pumpkins.svg)](https://img.shields.io/pypi/v/mashing-pumpkins.svg)
 
 The package is rather well documented with:
 - Sphinx documentation in [doc/](doc/) (start with [doc/index.rst](doc/index.rst))
