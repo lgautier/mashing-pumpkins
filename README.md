@@ -20,12 +20,27 @@ The package is rather well documented with:
 
 ## Installation
 
-Python 3.5 or 3.6 and a C/C++ compiler (C99-aware) are pretty much everything needed. With pip, installing the "master" branch can be done with:
+Python 3.5 or 3.6 and a C/C++ compiler (C99-aware) are pretty much everything needed.
+
+With pip, installing either latest release or the "master" branch can be done with:
 
 ```bash
+# latest release
+pip install mashing-pumpkins
 
+# master on github
 pip install git+https://https://github.com/lgautier/mashing-pumpkins.git
 
+```
+
+The installation can be tested with:
+
+```bash
+python -m pytest --pyargs mashingpumpkins
+
+# or:
+
+python -m pytest --cov=mashingpumpkins ---cov-report term
 ```
 
 ## Usage

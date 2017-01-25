@@ -41,7 +41,21 @@ Released versions are on the Python package index (pypi) and can installed with
    This was package was designed for Python 3.5, and is tested on both Python 3.5 and 3.6.
    Earlier versions of Python are not expected to work.
    
+The installation can be tested with:
 
+.. code-block:: bash
+
+   python -m pytest --pyargs mashingpumpkins
+
+
+or:
+
+.. code-block:: bash
+
+   python -m pytest --cov=mashingpumpkins ---cov-report term
+
+
+   
 Sketches
 --------
 
@@ -85,7 +99,7 @@ Composability
 ^^^^^^^^^^^^^
 
 Top and bottom sketches have interesting composability properties, which we represent by letting them be "added"
-to one another.
+to one another. That property can be useful for parallelization (See :ref:`parallel`).
 
 .. code-block:: python
 
@@ -112,7 +126,7 @@ to one another.
    # where added ? mhs_ab contains the same sketch.
 
 
-The methods are
+The methods are:
 
 - :meth:`mashingpumpkins.minhashsketch.MaxSketch.__add__`
 - :meth:`mashingpumpkins.minhashsketch.MaxSketch.__iadd__`
@@ -128,7 +142,8 @@ Freezing
 The classes :class:`mashingpumpkins.minhashsketch.MaxSketch` and :class:`mashingpumpkins.minhashsketch.MinSketch`
 are designed to build sketches, and to do so efficiently they contain data structures than may be not be necessary for further
 use. To highlight this usage pattern we have a method `freeze` (:meth:`mashingpumpkins.minhashsketch.MaxSketch.freeze`
-and :class:`mashingpumpkins.minhashsketch.MinSketch.freeze` respectively) that returns a frozen set.
+and :class:`mashingpumpkins.minhashsketch.MinSketch.freeze` respectively) that returns an instance of a
+class wrapping :class:`frozenset`.
 
 
 classes
@@ -191,6 +206,8 @@ classes relatively lean.
       
 Parallelization utilities
 -------------------------
+
+.. _parallel:
 
 This module suggests primitives to write code performing parallel computation.
 
