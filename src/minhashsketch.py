@@ -617,9 +617,16 @@ class FrozenSketch(object):
         """ Number of ngrams / kmers visited (considered for inclusion) so far. """
         return self._nvisited
 
-    def jaccard(self, obj):
-        """ Compute the Jaccard index between this sketch and an other sketch"""
+    def jaccard_similarity(self, obj):
+        """ Compute the Jaccard similarity index between this sketch and an other sketch"""
         return len(self._sketch.intersection(obj._sketch)) /  len(self._sketch.union(obj._sketch))
+    
+    # Alias for `jaccard_similarity`
+    jaccard_correspondance = jaccard_similarity
+    
+    def jaccard_inclusion(self, obj):
+        """ Compute the Jaccard inclusion index between this sketch and an other sketch"""
+        return len(self._sketch.intersection(obj._sketch)) /  len(self._sketch)
 
     def __len__(self):
         """ Return the number of elements in the set. """

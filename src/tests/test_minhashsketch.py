@@ -448,10 +448,10 @@ def test_FrozenSketch():
     assert len(mhs) == maxsize
     assert len(mhs._sketch) == maxsize
 
-    assert mhs.jaccard(mhs) == 1
+    assert mhs.jaccard_similarity(mhs) == 1
     sketch = set((1,2,3,6,7))
     mhs_b = FrozenSketch(sketch, nsize, maxsize = maxsize, nvisited=len(sketch))
-    assert mhs.jaccard(mhs_b) == 3/7
+    assert mhs.jaccard_similarity(mhs_b) == 3/7
     
     # invalid maxsize
     with pytest.raises(ValueError):
