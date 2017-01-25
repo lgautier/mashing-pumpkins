@@ -3,8 +3,9 @@ from distutils.core import setup, Extension
 import os
 import warnings
 
+PYPINAME = "mashing-pumpkins"
 PACKAGENAME = "mashingpumpkins"
-VERSION="0.1"
+VERSION="0.1.1"
 
 extra_compile_args = ['-pedantic']
 
@@ -53,7 +54,7 @@ xxh_mod = Extension("%s._xxhash" % PACKAGENAME,
                      '-Wstrict-prototypes', '-Wundef'])
 
 setup(
-    name = PACKAGENAME,
+    name = PYPINAME,
     version = VERSION,
     description = "Hash sketches of sequences",
     license = "MIT",
