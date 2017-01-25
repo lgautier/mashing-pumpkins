@@ -1,4 +1,4 @@
-import ijson
+#import ijson
 import jsonschema
 
 
