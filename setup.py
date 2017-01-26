@@ -20,6 +20,11 @@ CLASSIFIERS = [
     "Topic :: Scientific/Engineering",
 ]
 
+if tuple(sys.version_info[:2]) < (3, 5):
+    print("Error: Python >= 3.5 is *required*.")
+    sys.exit(1)
+    
+
 if sys.platform == 'darwin':
     warnings.warn("Not tested on OSX. Feedback welcome.")
     pass
