@@ -17,8 +17,10 @@ from functools import reduce
 import time
 import sys
 import gzip
+import pickle
 
 FORMAT_SOURMASH_JSON = 'sourmash-json'
+FORMAT_MASHINGPUMPKINS_PICKLE = 'mashingpumpkins-pickle'
 
 def reads_in_chunks(reader, chunksize, nsize, metrics):
     chunk = list()
@@ -82,7 +84,7 @@ def make_argparser():
                         help = 'Number of cores to use. Optimal results may require adjusting --chunksize (default: %(default)i)')
     parser.add_argument('--output-format',
                         default = FORMAT_SOURMASH_JSON,
-                        choices = (FORMAT_SOURMASH_JSON,),
+                        choices = (FORMAT_SOURMASH_JSON, FORMAT_MASHINGPUMPKINS_PICKLE),
                         help = 'Output format for the sketch (default: %(default)s).')
     parser.add_argument('--chunksize',
                         default = int(5E6),
@@ -117,8 +119,6 @@ if __name__ == '__main__':
     if args.output_format == FORMAT_SOURMASH_JSON:
         def save_func(sketches, fh_out):
             sourmash_lib.signature.save_signatures(sketches, fp=fh_out)
-    else:
-        print('The output format "%s" is not yet supported.' % args.output_format)
         
     cls = MinSketch
     seed = 42
@@ -163,14 +163,22 @@ if __name__ == '__main__':
         if args.aggregate:
             total_mhs.update(mhs_up)
         else:
-            sms = mashingpumpkins.sourmash.to_sourmashsignature(mhs_mp)
-            with open(fn + '.sig.json', 'w') as fh_out:
-                save_func([sms], fh_out)
+            if args.output_format == FORMAT_SOURMASH_JSON:
+                sms = mashingpumpkins.sourmash.to_sourmashsignature(mhs_mp)
+                with open(fn + '.sig.json', 'w') as fh_out:
+                    save_func([sms], fh_out)
+            elif args.output_format == FORMAT_MASHINGPUMPKINS_PICKLE:
+                with open(fn + '.sig.pkl', 'wb') as fh_out:
+                    pickle.dump(mhs_mp, fh_out)
                 
         t1 = time.time()
         print(': %i records in %s (%.2f MB/s)' % (metrics[0], prettytime(t1-t0), metrics[1]/1E6/(t1-t0)))
     if args.aggregate:
-        sms = mashingpumpkins.sourmash.to_sourmashsignature(total_mhs)
-        with open(args.aggregate_prefix + '.sig.json', 'w') as fh_out:
-            save_func([sms], fh_out)
+        if args.output_format == FORMAT_SOURMASH_JSON:
+            sms = mashingpumpkins.sourmash.to_sourmashsignature(total_mhs)
+            with open(args.aggregate_prefix + '.sig.json', 'w') as fh_out:
+                save_func([sms], fh_out)
+        elif args.output_format == FORMAT_MASHINGPUMPKINS_PICKLE:
+            with open(fn + '.sig.pkl', 'wb') as fh_out:
+                pickle.dump(total_mhs, fh_out)
 
