@@ -10,6 +10,18 @@ matrix:
     - os: linux
       python: 3.5
       compiler: gcc
+    - os: linux
+      python: 3.6
+      compiler: clang
+    - os: linux
+      python: 3.6
+      compiler: gcc
+    - os: osx
+      python: 3.5
+      compiler: clang
+    - os: osx
+      python: 3.5
+      compiler: gcc
     - os: osx
       python: 3.6
       compiler: clang
