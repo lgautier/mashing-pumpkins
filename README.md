@@ -21,7 +21,8 @@ The package is rather well documented with:
 
 ## Installation
 
-Python 3.5 or 3.6 and a C/C++ compiler (C99-aware) are pretty much everything needed.
+Python 3.5 or 3.6 and a C/C++ compiler (C99-aware) are pretty much everything that is needed. At the time of writing the CI
+on Travis is testing with gcc and clang.
 
 With pip, installing either latest release or the "master" branch can be done with:
 
