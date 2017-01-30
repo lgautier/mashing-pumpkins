@@ -10,8 +10,6 @@ from mashingpumpkins.sequence import chunkpos_iter
 import mashingpumpkins.sourmash
 from array import array
 import multiprocessing
-import ngs_plumbing.fasta
-import ngs_plumbing.fastq
 import sourmash_lib.signature
 from functools import reduce
 import time
@@ -86,6 +84,10 @@ def make_argparser():
                         default = FORMAT_SOURMASH_JSON,
                         choices = (FORMAT_SOURMASH_JSON, FORMAT_MASHINGPUMPKINS_PICKLE),
                         help = 'Output format for the sketch (default: %(default)s).')
+    parser.add_argument('--parser',
+                        default = 'ngs_plumbing',
+                        choices = ('ngs_plumbing', 'fastqandfurious'),
+                        help = 'Parser used (default: %(default)s).')
     parser.add_argument('--chunksize',
                         default = int(5E6),
                         type = int,
@@ -119,7 +121,29 @@ if __name__ == '__main__':
     if args.output_format == FORMAT_SOURMASH_JSON:
         def save_func(sketches, fh_out):
             sourmash_lib.signature.save_signatures(sketches, fp=fh_out)
-        
+
+    if args.parser == 'ngs_plumbing':
+        try:
+            import ngs_plumbing.fasta
+            import ngs_plumbing.fastq
+        except ImportError as ie:
+            print(ie)
+            sys.exit(1)
+        if args.format == 'FASTQ':
+            parser = ngs_plumbing.fastq.read_fastq
+        elif args.format == 'FASTA':
+            parser = ngs_plumbing.fastq.read_fasta
+    elif args.parser == 'fastqandfurious':
+        try:
+            from fastqandfurious import fastqandfurious, _fastqandfurious
+        except ImportError as ie:
+            print(ie)
+            sys.exit(1)
+        if args.format == 'FASTQ':
+            parser = lambda fh: fastqandfurious.readfastq_iter(fh, 20000, _entrypos=_fastqandfurious.entrypos)        
+        elif args.format == 'FASTA':
+            print('Error: no FASTA parser with fastqandfurious')
+            sys.exit(1)
     cls = MinSketch
     seed = 42
     hashfun = mashingpumpkins.sourmash.mash_hashfun
@@ -141,10 +165,10 @@ if __name__ == '__main__':
                 fh = gzip.open(fh)
 
             if args.format == 'FASTQ':
-                reader = ngs_plumbing.fastq.read_fastq(fh)
+                reader = parser(fh)
                 print('as a FASTQ file', end='', flush=True)
             elif args.format == 'FASTA':
-                reader = ngs_plumbing.fasta.read_fasta(fh)
+                reader = parser(fh)
                 print('as a FASTA file', end='', flush=True)
             else:
                 print('*** Unknown format.')
