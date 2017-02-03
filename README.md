@@ -1,7 +1,7 @@
 [![logo](doc/_static/mashingpumpkins.png)](doc/_static/mashingpumpkins.png)
 # mashing-pumpkins
 
-Convenient-yet-pretty-fast minhashing-related miscellanea for Python >= 3.5.
+Flexible-yet-pretty-fast minhashing-related library for Python >= 3.5.
 
 [![Build Status](https://travis-ci.org/lgautier/mashing-pumpkins.svg?branch=master)](https://travis-ci.org/lgautier/mashing-pumpkins)
 [![codecov](https://codecov.io/gh/lgautier/mashing-pumpkins/branch/master/graph/badge.svg)](https://codecov.io/gh/lgautier/mashing-pumpkins)
@@ -11,11 +11,15 @@ The package is rather well documented with:
 - Sphinx documentation in [doc/](doc/) (start with [doc/index.rst](doc/index.rst))
 - Docstrings for most of the functions, classes, and methods
 - A showcase notebook in [doc/notebooks](doc/notebooks)
+- A demo command-line tool to build sketches in sourmash's JSON format (`python -m mashingpumpkins.demo.cmdline --help`)
 
-[MASH](https://github.com/marbl/Mash) and [sourmash](https://github.com/dib-lab/sourmash) started it all. They have good documentation. Check them out !
+Why Minhash sketches ?
+
+- [MASH](https://github.com/marbl/Mash) (Mash: fast genome and metagenome distance estimation using MinHash. Ondov BD, Treangen TJ, Melsted P, Mallonee AB, Bergman NH, Koren S, Phillippy AM. Genome Biol. 2016 Jun 20;17(1):132. doi: 10.1186/s13059-016-0997-x.)
+- [sourmash](https://github.com/dib-lab/sourmash)
+
 
 - MurmurHash3 code is in the public domain (author: Austin Appleby)
-
 - XXHash code is released under BSD-2 license (author: Yann Collet)
 
 
