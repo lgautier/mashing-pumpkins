@@ -23,16 +23,19 @@ FORMAT_MASHINGPUMPKINS_PICKLE = 'mashingpumpkins-pickle'
 def reads_in_chunks(reader, chunksize, nsize, metrics):
     chunk = list()
     currentsize = 0
-    for n, record in enumerate(reader, 1):
-        lseq = len(record.sequence)
+    progress_step = 50000
+    for n, (header, sequence, quality) in enumerate(reader, 1):
+        if n % progress_step == 0:
+            print('\r    %i entries' % n, end='', flush=True)
+        lseq = len(sequence)
         if lseq > chunksize:
             for beg, end in chunkpos_iter(nsize, lseq, chunksize):
                 metrics[1] += lseq
-                yield (record.sequence[beg:end],)
+                yield (sequence[beg:end],)
             continue
         else:
-            chunk.append(record.sequence)
-            currentsize += len(record.sequence)
+            chunk.append(sequence)
+            currentsize += len(sequence)
             if currentsize >= chunksize:
                 metrics[1] += currentsize
                 yield chunk
@@ -42,6 +45,7 @@ def reads_in_chunks(reader, chunksize, nsize, metrics):
     if currentsize >= 0:
         metrics[1] += currentsize
         yield chunk
+    print('\r    %i records' % (n+1), end='', flush=True)
 
 def prettytime(secs):
     mins = secs // 60
@@ -166,10 +170,10 @@ if __name__ == '__main__':
 
             if args.format == 'FASTQ':
                 reader = parser(fh)
-                print('as a FASTQ file', end='', flush=True)
+                print('as a FASTQ file...', flush=True)
             elif args.format == 'FASTA':
                 reader = parser(fh)
-                print('as a FASTA file', end='', flush=True)
+                print('as a FASTA file...', flush=True)
             else:
                 print('*** Unknown format.')
                 sys.exit(1)
@@ -196,7 +200,7 @@ if __name__ == '__main__':
                     pickle.dump(mhs_mp, fh_out)
                 
         t1 = time.time()
-        print(': %i records in %s (%.2f MB/s)' % (metrics[0], prettytime(t1-t0), metrics[1]/1E6/(t1-t0)))
+        print('\r    %i records in %s (%.2f MB/s)' % (metrics[0]+1, prettytime(t1-t0), metrics[1]/1E6/(t1-t0)))
     if args.aggregate:
         if args.output_format == FORMAT_SOURMASH_JSON:
             sms = mashingpumpkins.sourmash.to_sourmashsignature(total_mhs)
