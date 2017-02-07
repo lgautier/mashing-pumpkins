@@ -6,9 +6,18 @@
 mashing-pumpkins : m(in|ax)hash
 ===============================
 
+Flexible-yet-pretty-fast minhashing-related library for Python >= 3.5.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+.. image:: https://travis-ci.org/lgautier/mashing-pumpkins.svg?branch=master
+    :target: https://travis-ci.org/lgautier/mashing-pumpkins
+
+.. image:: https://img.shields.io/pypi/v/mashing-pumpkins.svg
+    :target: https://img.shields.io/pypi/v/mashing-pumpkins.svg
+
 
 About
 -----
@@ -20,8 +29,70 @@ The design of this package aims at making experimentations with such sketches ea
 conserving a reasonable performance profile. At the time of writing it has a very competitive performance profile
 both in runtime and memory usage when compared to alternatives.
 
+
+Why Minhash sketches ?
+^^^^^^^^^^^^^^^^^^^^^^
+
+Bottom-sketches (Minhash sketches) are samples of the elements present in a set. In the context of genomics, this can mean
+the k-mers present in a genome, or in the reads from a sequencing assay, and they have been shown to be useful to measure similarity
+between genomes[1].
+
+Sampling subsequences from genome sequences or sequence assays has also been demonstrated
+to be a very efficient approach to identify DNA sequences of unknown origin[2], both in terms of accuracy and in
+terms of usage of bandwidth.
+
+This is making such sketches interesting tools for the analysis of NGS data, with several implementations already available[3]
+
+1- `MASH`_ (Mash: fast genome and metagenome distance estimation using MinHash. Ondov BD, Treangen TJ, Melsted P, Mallonee AB, Bergman NH, Koren S, Phillippy AM. Genome Biol. 2016 Jun 20;17(1):132. doi: 10.1186/s13059-016-0997-x.)
+2 - `Tapir/DNAsnout`_ ([Gautier, Laurent, and Ole Lund. "Low-bandwidth and non-compute intensive remote identification of microbes from raw sequencing reads." PloS one 8.12 (2013): e83784.](http://dx.doi.org/10.1371/journal.pone.0083784))
+3- `sourmash`_
+
+.. _MASH: https://github.com/marbl/Mash
+.. _Tapir/DNAsnout: https://bitbucket.org/lgautier/dnasnout-client
+.. _sourmash: https://github.com/dib-lab/sourmash
+
+
+Why this implementation ?
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The purpose of this implementation is to provide a library design that is combining flexibility and expressivity with performance
+(speed and memory usage).
+
+
+Design
+""""""
+
+The design is allowing us to implement with a relatively short code base:
+
+- the use different hash functions (MurmurHash3, XXHash), and with user-specified seeds
+- Minhash and Maxhash sketches
+- "Count sketches"
+- Demonstrate quickly the comparative efficiency of alternative hashing strategies for double-stranded genomes (see - https://github.com/marbl/Mash/issues/45#issuecomment-274665746)
+
+Performance
+"""""""""""
+
+At the time of writing it is able to build a minhash sketch (k=31, size=1000) for a FASTQ file with ~21M reads (700MB when gzip-compressed)
+on a laptop[*] in under 1'30".
+
+.. code-block:: bash
+
+   $ python -m mashingpumpkins.demo.cmdline --parser=fastqandfurious --ncpu=3 DRR065801.fastq.gz
+   Processing DRR065801.fastq.gz as a FASTQ file...
+       20853697 records in 1m20s (9.43 MB/s)
+
+
+(*: ASUS ultrabook, dual-core with hyperthreading, running Linux)
+
+
 Installation
 ------------
+
+The package released under an MIT license. It contains code for the following hashing functions:
+
+- MurmurHash3 (public domain - author: Austin Appleby)
+- XXHash (BSD-2 license - author: Yann Collet)
+
 
 Released versions are on the Python package index (pypi) and can installed with
 `pip`.
@@ -31,6 +102,14 @@ Released versions are on the Python package index (pypi) and can installed with
    pip install mashing-pumpkins
 
 
+To install the master on github:
+
+.. code-block:: bash
+
+   # master on github
+   pip install git+https://https://github.com/lgautier/mashing-pumpkins.git
+```
+   
 .. note::
 
    A C/C++ compiler as well the Python development headers will be required. The C compiler should accept
@@ -54,6 +133,22 @@ or:
 
    python -m pytest --cov=mashingpumpkins ---cov-report term
 
+
+
+Usage
+-----
+
+While this is primarily a Python libray, there is demo command line:
+
+```bash
+
+python -m mashingpumpkins.demo.cmdline
+
+```
+
+.. note::
+
+   This requires the Python package :mod:`sourmash` (its dev version in `master`)
 
    
 Sketches

@@ -88,7 +88,7 @@ python -m pytest --cov=mashingpumpkins ---cov-report term
 
 ## Usage
 
-This is primarily a Python libray, but at the time writing we are a little demo section going on
+While this is primarily a Python libray, a demo command line it available
 (**note: this requires the Python package `sourmash` (its dev version in `master`)**):
 
 ```bash
