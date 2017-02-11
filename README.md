@@ -23,7 +23,7 @@ Sampling subsequences from genome sequences or sequence assays has also been dem
 to be a very efficient approach to identify DNA sequences of unknown origin[2], both in terms of accuracy and in
 terms of usage of bandwidth.
 
-This is making such sketches interesting tools for the analysis of NGS data, with several implementations already available[3]
+This is making such sketches interesting tools for the analysis of NGS data, with several implementations already available[1,3]
 
 1. [MASH](https://github.com/marbl/Mash) - Mash: fast genome and metagenome distance estimation using MinHash. Ondov BD, Treangen TJ, Melsted P, Mallonee AB, Bergman NH, Koren S, Phillippy AM. Genome Biol. 2016 Jun 20;17(1):132. doi: 10.1186/s13059-016-0997-x.
 2. [Tapir/DNAsnout](https://bitbucket.org/lgautier/dnasnout-client) - Gautier, Laurent, and Ole Lund. "Low-bandwidth and non-compute intensive remote identification of microbes from raw sequencing reads." PloS one 8.12 (2013): e83784.(http://dx.doi.org/10.1371/journal.pone.0083784)
