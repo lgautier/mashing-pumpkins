@@ -83,7 +83,7 @@ on a laptop[*] in under 1'30".
        20853697 records in 1m20s (9.43 MB/s)
 
 
-(*: ASUS ultrabook, dual-core with hyperthreading, running Linux)
+(*: ASUS ultrabook, dual-core with hyperthreading, running Linux - adding more cores to the task on more powerful hardware should make it faster)
 
 
 Installation
