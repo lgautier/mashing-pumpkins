@@ -140,12 +140,15 @@ or:
 Usage
 -----
 
-While this is primarily a Python libray, there is demo command line:
+Jupyter notebooks are available in the `doc/notebooks`_ (in the source tree).
+
+.. _doc/notebooks: https://github.com/lgautier/mashing-pumpkins/tree/master/doc/notebooks
+
+While this is primarily a Python libray, there is also demo command line:
 
 .. code-block:: bash
 
    python -m mashingpumpkins.demo.cmdline
-
 
 
 .. note::
@@ -242,6 +245,8 @@ use. To highlight this usage pattern we have a method `freeze` (:meth:`mashingpu
 and :class:`mashingpumpkins.minhashsketch.MinSketch.freeze` respectively) that returns an instance of a
 class wrapping :class:`frozenset`.
 
+"Frozen" sets have methods to compute similarity measure (e.g., two Jaccard's index measures - see the class
+:class:`mashingpumpkins.minhashsketch.FrozenSketch` for a full list).
 
 classes
 ^^^^^^^
@@ -253,6 +258,10 @@ classes
    .. automethod:: mashingpumpkins.minhashsketch.MaxSketch.add(seq, hashbuffer=array)
 
 .. autoclass:: mashingpumpkins.minhashsketch.MinSketch
+   :members:
+
+
+.. autoclass:: mashingpumpkins.minhashsketch.FrozenSketch
    :members:
 
 
