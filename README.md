@@ -16,8 +16,8 @@ The package is rather well documented with:
 ## Why Minhash sketches ?
 
 Bottom-sketches (Minhash sketches) are samples of the elements present in a set. In the context of genomics, this can mean
-the k-mers present in a genome, or in the reads from a sequencing assay, and they have been shown to be useful to measure similarity
-between genomes[1].
+the k-mers present in a genome (called "k-shingles" in MinHash-related litterature), or in the reads from a sequencing assay, and
+they have been shown to be useful to measure similarity between genomes[1].
 
 Sampling subsequences from genome sequences or sequence assays has also been demonstrated
 to be a very efficient approach to identify DNA sequences of unknown origin[2], both in terms of accuracy and in
