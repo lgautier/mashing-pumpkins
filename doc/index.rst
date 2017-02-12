@@ -75,7 +75,7 @@ Performance
 
 The implementation also happens to be pretty fast, making it a reasonable option as a building block for minhash-related research and prototypes.
 At the time of writing it is able to build a minhash sketch (k=31, size=1000) for a FASTQ file with ~21M reads (700MB when gzip-compressed)
-on a laptop[*] in under 1'30".
+on a laptop[1] in under 1'30".
 
 .. code-block:: bash
 
@@ -84,7 +84,7 @@ on a laptop[*] in under 1'30".
        20853697 records in 1m20s (9.43 MB/s)
 
 
-(*: ASUS ultrabook, dual-core with hyperthreading, running Linux - adding more cores to the task on more powerful hardware should make it faster)
+1. ASUS ultrabook, dual-core with hyperthreading, running Linux - adding more cores to the task on more powerful hardware should make it faster
 
 
 Installation
@@ -110,7 +110,7 @@ To install the master on github:
 
    # master on github
    pip install git+https://https://github.com/lgautier/mashing-pumpkins.git
-```
+
    
 .. note::
 
@@ -142,11 +142,11 @@ Usage
 
 While this is primarily a Python libray, there is demo command line:
 
-```bash
+.. code-block:: bash
 
-python -m mashingpumpkins.demo.cmdline
+   python -m mashingpumpkins.demo.cmdline
 
-```
+
 
 .. note::
 
