@@ -1,7 +1,3 @@
-#import ijson
-#import jsonschema
-
-
 msg = 'This is not yet implemented'
 
 def validate(sketch):

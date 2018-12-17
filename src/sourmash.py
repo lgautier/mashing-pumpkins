@@ -21,6 +21,7 @@ sourmashmaskatgc_tbl = bytearray([ord(b'N'),]*256)
 for x,y in zip(b'ATGC', b'ATGC'):
     sourmashmaskatgc_tbl[x] = y
 
+
 def revcomp(sequence):
     """
     Compute the reverse-complement of a DNA sequence
@@ -33,9 +34,10 @@ def revcomp(sequence):
     ba = ba.translate(compl_tbl)
     return ba
 
+
 def mash_hashfun(sequence,
                  nsize: int,
-                 buffer = array('Q', [0,]*300),
+                 buffer=array('Q', [0,]*300),
                  seed: int = DEFAULT_SEED):
     """
     Hashing function that performs hashing the MASH/sourmash way. The input sequence
@@ -53,29 +55,31 @@ def mash_hashfun(sequence,
     res =  _murmurhash3_mash.hasharray_withrc(sequence, revcomp(sequence), nsize, buffer, seed)
     return res
 
+
 def to_sourmashsignature(obj,
-                         is_protein = False,
-                         email = None,
-                         name = '',
-                         filename = ''):
-    
+                         is_protein=False,
+                         email=None,
+                         name='',
+                         filename=''):
+
     if not isinstance(obj, MinSketch):
         raise ValueError("The obj must be a MinSketch.")
 
     if not obj._hashfun is mash_hashfun:
         raise ValueError("The only accepted hash function is %s." % str(mash_hashfun))
 
-    estimator = sourmash_lib.Estimators(n = obj.maxsize,
-                                        ksize = obj.nsize,
-                                        is_protein = is_protein,
-                                        with_cardinality = False,
-                                        track_abundance = False,
-                                        max_hash = 0, # ???
-                                        seed = obj.seed)
+    estimator = sourmash_lib.Estimators(n=obj.maxsize,
+                                        ksize=obj.nsize,
+                                        is_protein=is_protein,
+                                        with_cardinality=False,
+                                        track_abundance=False,
+                                        max_hash=0,  # ???
+                                        seed=obj.seed)
     for h in obj._heapset:
         estimator.mh.add_hash(h)
-        
+
     return sourmash_lib.signature.SourmashSignature(email, estimator, name, filename)
+
 
 def from_sourmashsignature(obj):
     

@@ -2,6 +2,7 @@
 Utilities to handle sequences
 """
 
+
 def chunkpos_iter(nsize: int, lseq: int, w: int) -> (int, int):
     """
     Iterator of chunk indices.
@@ -14,7 +15,7 @@ def chunkpos_iter(nsize: int, lseq: int, w: int) -> (int, int):
 
     assert nsize <= w
     ew = w-nsize+1
-    
+
     nchunks = (lseq // ew)
 
     leftover = lseq - nchunks*ew

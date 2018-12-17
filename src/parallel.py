@@ -2,9 +2,9 @@
 Parallelization utilities
 """
 
-from mashingpumpkins.sequence import chunkpos_iter
 from functools import reduce
 import multiprocessing
+
 
 class Sketch(object):
 
@@ -16,7 +16,6 @@ class Sketch(object):
         global sketch_constructor
         def sketch_constructor():
             return cls(*args)
-
     
     @staticmethod
     def map_sequence(sequence):
@@ -79,7 +78,6 @@ class SketchList(object):
         def sketchlist_constructor():
             return (cls(*args) for cls, args in zip(clslist, argslist))
 
-    
     @staticmethod
     def map_sequence(sequence):
         """
@@ -118,4 +116,3 @@ class SketchList(object):
         for a,b in zip(alist, blist):
             a.update(b)
         return alist
-
