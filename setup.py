@@ -5,7 +5,7 @@ import warnings
 
 PYPINAME = "mashing-pumpkins"
 PACKAGENAME = "mashingpumpkins"
-VERSION="0.2.0"
+VERSION="0.2.1"
 
 extra_compile_args = ['-pedantic']
 
@@ -23,7 +23,6 @@ CLASSIFIERS = [
 if tuple(sys.version_info[:2]) < (3, 5):
     print("Error: Python >= 3.5 is *required*.")
     sys.exit(1)
-    
 
 if sys.platform == 'darwin':
     warnings.warn("Not tested on OSX. Feedback welcome.")

@@ -1,22 +1,34 @@
+import abc
 from heapq import heappush, heapreplace
 from collections import Counter
 import array
 from mashingpumpkins.sequence import chunkpos_iter
 
-# types of sketches
-TYPE_MAXHASH = 0
-TYPE_MINHASH = 1
 
-
-class MaxSketch(object):
-    """
-    Top sketch, which contains a sample of the input set constituted of
-    the `maxsize` elements with the highest hash values.
-    """
+class SetSketch(abc.ABC):
 
     _anynew = None
-    _initheap = 0
-    _sketchtype = TYPE_MAXHASH
+        
+    @property
+    def maxsize(self):
+        """ Maximum size for the sketch. """
+        return self._maxsize
+
+    @property
+    def nsize(self):
+        """ Size of the ngrams / kmers. """
+        return self._nsize
+
+    @property
+    def seed(self):
+        """ Seed for hashfun """
+        return self._seed
+
+    @property
+    def nvisited(self):
+        """ Number of items in the set "seen" (considered for inclusion)
+        so far. """
+        return self._nvisited
 
     def __init__(self, nsize: int,
                  maxsize: int,
@@ -44,26 +56,20 @@ class MaxSketch(object):
         self._heapset = set(self._heap)
         self._nvisited = nvisited
 
-    @property
-    def maxsize(self):
-        """ Maximum size for the sketch. """
-        return self._maxsize
+    def __len__(self):
+        """
+        Return the number of elements in the sketch. See also the property
+        'nvisited'.
+        """
+        return len(self._heap)
 
-    @property
-    def nsize(self):
-        """ Size of the ngrams / kmers. """
-        return self._nsize
+    def __contains__(self, elt):
+        """
+        Return whether a given element is in the sketch
 
-    @property
-    def seed(self):
-        """ Seed for hashfun """
-        return self._seed
-
-    @property
-    def nvisited(self):
-        """ Number of ngrams / kmers visited (considered for inclusion)
-        so far. """
-        return self._nvisited
+        - elt: an object as returned by the method `make_elt()`
+        """
+        return elt in self._heapset
 
     def _add_elt_unsafe(self, h, elt):
         """
@@ -92,6 +98,93 @@ class MaxSketch(object):
         heapset.remove(self._extracthash(out))
         return out
 
+    def __add__(self, obj):
+        """
+        Add two sketches such as to perserve the sketch property with
+        hash values.
+        """
+        if self.nsize != obj.nsize:
+            raise ValueError(
+                'Only objects with the same `nsize` can be added '
+                '(here %i and %i).'
+                % (self.nsize, obj.nsize)
+            )
+
+        if self._hashfun != obj._hashfun:
+            raise ValueError(
+                'Only objects with the same hashfunction can be added.'
+            )
+
+        if self.seed != obj.seed:
+            raise ValueError(
+                'Only objects with the same seed can be added.'
+            )
+
+        res = type(self)(self.nsize, self.maxsize, self._hashfun, self.seed)
+        res.update(self)
+        res.update(obj)
+        return res
+
+    def __iadd__(self, obj):
+        self.update(obj)
+
+    def __iter__(self):
+        """
+        Return an iterator over the elements in the sketch.
+        """
+        return iter(sorted(self._heap))
+
+    def add(self, seq, hashbuffer=array.array('Q', [0, ]*250)):
+        """ Add all sub-sequences of length `self.nsize` found in the sequence
+        "seq".
+
+        - seq: a bytes-like sequence than can be sliced, and the slices
+            be consummed by the function in the property `hashfun` (given to
+            the constructor)
+        - hashbuffer: a buffer array to store hash values during batch C calls
+
+        """
+        hashfun = self._hashfun
+        seed = self._seed
+        heap = self._heap
+        nsize = self._nsize
+        lseq = len(seq)
+
+        w = len(hashbuffer)
+        assert nsize <= w
+
+        anynew = self._anynew
+        make_elt = self._make_elt
+        extracthash = self._extracthash
+        lheap = len(heap)
+        if lheap > 0:
+            heaptop = extracthash(heap[0])
+        else:
+            heaptop = self._initheap
+
+        for slice_beg, slice_end in chunkpos_iter(nsize, lseq, w):
+            subs = seq[slice_beg:slice_end]  # safe: no out-of-bound in Python
+            nsubs = hashfun(subs, nsize, hashbuffer, seed)
+            heaptop = self._add(subs, nsubs, hashbuffer, heaptop,
+                                extracthash, make_elt, self._replace, anynew)
+            self._nvisited += nsubs
+
+    def freeze(self):
+        return FrozenSketch(self._heapset, self.nsize,
+                            self._hashfun,
+                            seed=self.seed,
+                            maxsize=self.maxsize,
+                            nvisited=self.nvisited)
+
+
+class MaxSketch(SetSketch):
+    """
+    Top sketch, which contains a sample of the input set constituted of
+    the `maxsize` elements with the highest hash values.
+    """
+
+    _initheap = 0
+
     @staticmethod
     def _make_elt(h, ngram):
         """
@@ -105,21 +198,6 @@ class MaxSketch(object):
     @staticmethod
     def _extracthash(heaptop):
         return heaptop[0]
-
-    def __len__(self):
-        """
-        Return the number of elements in the sketch. See also the property
-        'nvisited'.
-        """
-        return len(self._heap)
-
-    def __contains__(self, elt):
-        """
-        Return whether a given element is in the sketch
-
-        - elt: an object as returned by the method `make_elt()`
-        """
-        return elt in self._heapset
 
     def add_hashvalues(self, values):
         """
@@ -204,41 +282,6 @@ class MaxSketch(object):
                     anynew(h)
         return heaptop
 
-    def add(self, seq, hashbuffer=array.array('Q', [0, ]*250)):
-        """ Add all sub-sequences of length `self.nsize` found in the sequence
-        "seq".
-
-        - seq: a bytes-like sequence than can be sliced, and the slices
-            be consummed by the function in the property `hashfun` (given to
-            the constructor)
-        - hashbuffer: a buffer array to store hash values during batch C calls
-
-        """
-        hashfun = self._hashfun
-        seed = self._seed
-        heap = self._heap
-        nsize = self._nsize
-        lseq = len(seq)
-
-        w = len(hashbuffer)
-        assert nsize <= w
-
-        anynew = self._anynew
-        make_elt = self._make_elt
-        extracthash = self._extracthash
-        lheap = len(heap)
-        if lheap > 0:
-            heaptop = extracthash(heap[0])
-        else:
-            heaptop = self._initheap
-
-        for slice_beg, slice_end in chunkpos_iter(nsize, lseq, w):
-            subs = seq[slice_beg:slice_end]  # safe: no out-of-bound in Python
-            nsubs = hashfun(subs, nsize, hashbuffer, seed)
-            heaptop = self._add(subs, nsubs, hashbuffer, heaptop,
-                                extracthash, make_elt, self._replace, anynew)
-            self._nvisited += nsubs
-
     def update(self, obj):
         """
         Update the sketch with elements from `obj` in place (
@@ -247,14 +290,8 @@ class MaxSketch(object):
         - obj: An instance of class MaxSketch (or an instance of a child class)
         """
 
-        assert isinstance(obj, MaxSketch)
-
-        if not obj._sketchtype == self._sketchtype:
-            raise ValueError(
-                'Mismatching sketch type. This is a %s and the update '
-                'is a %s'
-                % (self._sketchtype, obj._sketchtype)
-            )
+        if not isinstance(obj, MaxSketch):
+            raise ValueError('Mismatching sketch type.')
 
         if hasattr(obj, "nsize") and self.nsize != obj.nsize:
             raise ValueError("Mismatching 'nsize' (have %i, update has %i)"
@@ -301,58 +338,14 @@ class MaxSketch(object):
 
         self._nvisited += obj.nvisited
 
-    def __add__(self, obj):
-        """
-        Add two sketches such as to perserve the sketch property with
-        hash values.
-        """
-        if self.nsize != obj.nsize:
-            raise ValueError(
-                'Only objects with the same `nsize` can be added '
-                '(here %i and %i).'
-                % (self.nsize, obj.nsize)
-            )
 
-        if self._hashfun != obj._hashfun:
-            raise ValueError(
-                'Only objects with the same hashfunction can be added.'
-            )
-
-        if self.seed != obj.seed:
-            raise ValueError(
-                'Only objects with the same seed can be added.'
-            )
-
-        res = type(self)(self.nsize, self.maxsize, self._hashfun, self.seed)
-        res.update(self)
-        res.update(obj)
-        return res
-
-    def __iadd__(self, obj):
-        self.update(obj)
-
-    def __iter__(self):
-        """
-        Return an iterator over the elements in the sketch.
-        """
-        return iter(sorted(self._heap))
-
-    def freeze(self):
-        return FrozenSketch(self._heapset, self.nsize,
-                            self._hashfun,
-                            seed=self.seed,
-                            maxsize=self.maxsize,
-                            nvisited=self.nvisited)
-
-
-class MinSketch(MaxSketch):
+class MinSketch(SetSketch):
     """
     Bottom sketch, which contains a sample of the input set constituted of the
     `maxsize` elements with the lowest hash values.
     """
 
     _initheap = 0
-    _sketchtype = TYPE_MINHASH
 
     @staticmethod
     def _extracthash(heaptop):
@@ -444,7 +437,9 @@ class MinSketch(MaxSketch):
         - obj: a MinSketch (or instance of a child class)
         """
 
-        assert isinstance(obj, MinSketch)
+        if not isinstance(obj, MinSketch):
+            raise ValueError('Mismatching sketch type.')
+
 
         if hasattr(obj, "nsize") and (self.nsize != obj.nsize):
             raise ValueError(
@@ -496,7 +491,7 @@ class MinSketch(MaxSketch):
 
 class CountTrait(object):
     """
-    Methods for sketches counting the number of occurences of hash values
+    Methods for sketches also counting the number of occurences of hash values
     in the input set / sequence.
     """
 
@@ -528,7 +523,7 @@ class CountTrait(object):
 
 class MaxCountSketch(MaxSketch, CountTrait):
     """
-    Top sketch where the number of times an hash value was found is stored
+    Top sketch where the number of times a hash value was found is also stored.
     """
 
     def __init__(self, nsize: int, maxsize: int,
@@ -572,7 +567,7 @@ class MaxCountSketch(MaxSketch, CountTrait):
 # would solve this.
 class MinCountSketch(MinSketch, CountTrait):
     """
-    Top sketch where the number of times an hash value was found is stored
+    Top sketch where the number of times a hash value was found is also stored.
     """
 
     def __init__(self, nsize: int, maxsize: int,
