@@ -36,9 +36,13 @@ matrix:
       compiler: gcc
     - os: osx
       python: 3.7
+      dist: xenial
+      sudo: true
       compiler: clang
     - os: osx
       python: 3.7
+      dist: xenial
+      sudo: true
       compiler: gcc
 
 before_install:
