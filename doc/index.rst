@@ -6,7 +6,7 @@
 mashing-pumpkins : m(in|ax)hash
 ===============================
 
-Flexible-yet-pretty-fast minhashing-related library for Python >= 3.5.
+Flexible-yet-pretty-fast minhash/maxhash-related library for Python >= 3.5.
 
 .. toctree::
    :maxdepth: 2
@@ -22,30 +22,40 @@ Flexible-yet-pretty-fast minhashing-related library for Python >= 3.5.
 About
 -----
 
-This package is a library to perform top and bottom sketches, or min-hash / max-hash sketches for sequences
-of bytes, using fixed-length subsets as the candidate components of the sketch.
+This package is a library to perform top and bottom sketches, or MinHash /
+MaxHash sketches initially for sequences of bytes, using fixed-length
+subsets as the candidate components of the sketch (also called
+"k-minimum values" variant of MinHash).
 
-The design of this package aims at making experimentations with such sketches easy to perform while
-conserving a reasonable performance profile. At the time of writing it has a very competitive performance profile
-both in runtime and memory usage when compared to alternatives.
+The design of this package aims at making experimentations with such sketches
+easy to perform while conserving a reasonable performance profile. At the time
+of writing it has a very competitive performance profile both in runtime and
+memory usage when compared to alternatives.
 
 
 Why Minhash sketches ?
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Bottom-sketches (Minhash sketches) are samples of the elements present in a set. In the context of genomics, this can mean
-the k-mers present in a genome (called "k-shingles" in MinHash-related litterature), or in the reads from a sequencing assay,
-and they have been shown to be useful to measure similarity
-between genomes[1].
+Bottom-sketches (Minhash sketches) are samples of the elements present in a set.
+They have been extensively used for text document matching or retrieval, which can
+extend to the context of genomics where strings are DNA or RNA sequences. There the
+set of k-mers present in a genome (called "k-shingles" in MinHash-related litterature),
+or in the reads from a sequencing assay, and they have been shown to be useful to
+measure similarity between genomes[1].
 
-Sampling subsequences from genome sequences or sequence assays has also been demonstrated
-to be a very efficient approach to identify DNA sequences of unknown origin[2], both in terms of accuracy and in
-terms of usage of bandwidth.
+Sampling subsequences from genome sequences or sequence assays has also been
+demonstrated to be a very efficient approach to identify DNA sequences of unknown
+origin[2], both in terms of accuracy and in terms of usage of bandwidth.
 
-This is making such sketches interesting tools for the analysis of NGS data, with several implementations already available[1,3]
+This is making such sketches interesting tools for the analysis of NGS data, with several
+implementations already available[1,3]
 
-1. `MASH`_ (Mash: fast genome and metagenome distance estimation using MinHash. Ondov BD, Treangen TJ, Melsted P, Mallonee AB, Bergman NH, Koren S, Phillippy AM. Genome Biol. 2016 Jun 20;17(1):132. doi: 10.1186/s13059-016-0997-x.)
-2. `Tapir/DNAsnout`_ ([Gautier, Laurent, and Ole Lund. "Low-bandwidth and non-compute intensive remote identification of microbes from raw sequencing reads." PloS one 8.12 (2013): e83784.](http://dx.doi.org/10.1371/journal.pone.0083784))
+1. `MASH`_ (Mash: fast genome and metagenome distance estimation using MinHash. Ondov BD,
+   Treangen TJ, Melsted P, Mallonee AB, Bergman NH, Koren S, Phillippy AM. Genome Biol. 2016
+   Jun 20;17(1):132. doi: 10.1186/s13059-016-0997-x.)
+2. `Tapir/DNAsnout`_ ([Gautier, Laurent, and Ole Lund. "Low-bandwidth and non-compute
+   intensive remote identification of microbes from raw sequencing reads." PloS one 8.12
+   (2013): e83784.](http://dx.doi.org/10.1371/journal.pone.0083784))
 3. `sourmash`_
 
 .. _MASH: https://github.com/marbl/Mash
