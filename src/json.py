@@ -1,10 +1,12 @@
-msg = 'This is not yet implemented'
+MSG = 'This is not yet implemented'
+
 
 def validate(sketch):
     """
     - sketch: a `dict`
     """
-    raise NotImplementedError(msg)
+    raise NotImplementedError(MSG)
+
 
 def readsketch_iter(iterable):
     """
@@ -12,11 +14,12 @@ def readsketch_iter(iterable):
 
     Returns a `dict` with a sketch information
     """
-    raise NotImplementedError(msg)
+    raise NotImplementedError(MSG)
+
 
 def readjamschema(schema):
     """
     Read a JAM definition schema
     """
-    raise NotImplementedError(msg)
+    raise NotImplementedError(MSG)
     
