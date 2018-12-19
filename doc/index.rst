@@ -205,6 +205,59 @@ If after a top-sketch, there is a class for this.
    from mashingpumpkins.minhashsketch import MaxSketch
 
 
+Sketches of arbritary objects
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+While the library was designed to work on sequences of bytes for which
+sketches are the MinHash or MaxHash sets for all k-shingles of fixed
+window length, it can also work with input sets of arbitrary objects,
+although this requires to defined adapter hashing functions
+ignore parameters associated with windowing, and if the hashing
+function returns a non-numerical only use :class:`MaxSketch`.
+
+.. code-block:: python
+
+    import hashlib
+    mhs = (mashingpumpkins.minhashsketch
+           .MaxSketch(
+               None,  # size is unspecified
+               maxsize,
+               None,  # hashing function
+               None  # seed
+           )
+          )
+
+     x = object()
+     mhs.add_hashvalues([x])
+
+An other example is when all elements in the input set are :class:`bytes` and
+the common hashing function SHA1 is wanted. In that case the hashing function
+would look like follows. Note that hashing function can return non-numerical
+values and the hashing function will plainly ignore the :param:`size` and
+:param:`buffer` as no sliding window is wanted.
+
+.. code-block:: python
+
+    def hashing_sha1(obj, size, buffer=None, seed=None):
+        return (hashlib.sha1(obj).digest(), )
+
+    import hashlib
+    mhs = (mashingpumpkins.minhashsketch
+           .MaxSketch(
+               None,  # size is unspecified
+               maxsize,
+               None,
+               None  # seed
+           )
+          )
+
+    values = (hashlib.sha1(x).digest()
+              for x in (b'This is a sequence of bytes',
+                        b'This is an other sequence of bytes'))
+    mhs.add_hashvalues(values)
+
+
+
 Composability
 ^^^^^^^^^^^^^
 
@@ -323,6 +376,14 @@ classes relatively lean.
    :private-members:
    :special-members:
    :exclude-members: __module__, __dict__, __weakref__
+
+.. autoclass:: mashingpumpkins.minhashsketch.SetSketch
+   :show-inheritance:
+   :members:
+   :undoc-members:
+   :private-members:
+   :special-members:
+   :exclude-members: __module__
 
 .. autoclass:: mashingpumpkins.minhashsketch.MaxCountSketch
    :show-inheritance:
