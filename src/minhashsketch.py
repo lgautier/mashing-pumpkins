@@ -67,7 +67,7 @@ class SetSketch(abc.ABC):
         """
         Return whether a given element is in the sketch
 
-        - elt: an object as returned by the method `make_elt()`
+        - elt: an object as returned by the method `make_elt(h, obj)`
         """
         return elt in self._heapset
 
@@ -76,10 +76,10 @@ class SetSketch(abc.ABC):
         Add an element.
 
         - h: hash value
-        - elt: an object as returned by the method `make_elt()`
+        - elt: an object as returned by the method `make_elt(h, obj)`
 
         Note: This method does not check whether the element is satisfying
-        the top-sketch property (that is all elements in the sketch
+        any property (if MaxHash, that is all elements in the sketch
         are the `maxsize` elements with the highest hash values).
         """
         self._heapset.add(h)
@@ -90,7 +90,7 @@ class SetSketch(abc.ABC):
         insert/replace an element
 
         - h: a hash value
-        - elt: an object as returned by the method `make_elt()`
+        - elt: an object as returned by the method `make_elt(h, obj)`
         """
         heapset = self._heapset
         heapset.add(h)
@@ -186,25 +186,26 @@ class MaxSketch(SetSketch):
     _initheap = 0
 
     @staticmethod
-    def _make_elt(h, ngram):
+    def _make_elt(h, obj):
         """
         Make an element to store into the sketch
 
         - h: a hash value
-        - ngram: the object (ngram/kmer) at the source of the hash value
+        - obj: arbitraty object to store with the hash
         """
-        return (h, ngram)
+        return (h, obj)
 
     @staticmethod
-    def _extracthash(heaptop):
-        return heaptop[0]
+    def _extracthash(elt):
+        return elt[0]
 
     def add_hashvalues(self, values):
         """
         Add hash values while conserving the top sketch characteristic of
         the set.
 
-        Note: The attribute `nvisited` is not incremented.
+        Note: The attribute `nvisited` is not incremented as this can
+        be used to merge several stop sketch sets.
 
         - values: an iterable of hash values
         """
@@ -229,7 +230,7 @@ class MaxSketch(SetSketch):
                     lheap += 1
                 if anynew is not None:
                     anynew(elt)
-            if h >= heaptop:
+            elif h >= heaptop:
                 if h not in heapset:
                     elt = make_elt(h, ngram)
                     self._replace(h, elt)
@@ -348,31 +349,31 @@ class MinSketch(SetSketch):
     _initheap = 0
 
     @staticmethod
-    def _extracthash(heaptop):
+    def _extracthash(elt):
         """
-        Extract the hash value for an element (see method `_make_elt()`). This
-        is overriding the parent class' method by returning the opposite value
-        (the parent class build top-sketches, taking the opposite allows us to
-        reuse a lot of the code).
+        Extract the hash value for an element (see method `_make_elt(h, obj)`).
+        This is overriding the parent class' method by returning the opposite
+        value (the parent class build top-sketches, taking the opposite allows
+        us to reuse a lot of the code).
         """
-        return - heaptop[0]
+        return -elt[0]
 
     @staticmethod
-    def _make_elt(h, ngram):
+    def _make_elt(h, obj):
         """
         Make an element to store into the sketch
 
-        - h: a hash value
-        - ngram: the object (ngram/kmer) at the source of the hash value
+        - h: an integer hash value
+        - obj: arbitraty object to store with the hash
         """
-        return (-h, ngram)
+        return (-h, obj)
 
     def _replace(self, h, elt):
         """
         insert/replace an element
 
         - h: a hash value
-        - elt: an object as returned by the method `make_elt()`
+        - elt: an object as returned by the method `make_elt(h, obj)`
         """
         heapset = self._heapset
         heapset.add(h)
@@ -428,6 +429,45 @@ class MinSketch(SetSketch):
                     anynew(h)
 
         return heaptop
+
+    def add_hashvalues(self, values):
+        """
+        Add hash values while conserving the bottom sketch characteristic of
+        the set.
+
+        Note: The attribute `nvisited` is not incremented as this can
+        be used to merge several stop sketch sets.
+
+        - values: an iterable of hash values
+        """
+        make_elt = self._make_elt
+        anynew = self._anynew
+        extracthash = self._extracthash
+        heap = self._heap
+        heapset = self._heapset
+        maxsize = self._maxsize
+        lheap = len(heap)
+        if lheap > 0:
+            heaptop = extracthash(heap[0])
+        else:
+            heaptop = None
+        ngram = None
+        for h in values:
+            if lheap < maxsize:
+                if h not in heapset:
+                    elt = make_elt(h, ngram)
+                    self._add_elt_unsafe(h, elt)
+                    heaptop = extracthash(heap[0])
+                    lheap += 1
+                if anynew is not None:
+                    anynew(elt)
+            elif h <= heaptop:
+                if h not in heapset:
+                    elt = make_elt(h, ngram)
+                    self._replace(h, elt)
+                    heaptop = extracthash(heap[0])
+                if anynew is not None:
+                    anynew(elt)
 
     def update(self, obj):
         """
