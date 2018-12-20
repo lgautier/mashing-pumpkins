@@ -43,8 +43,8 @@ implementations already available[1,3]
 .. _sourmash: https://github.com/dib-lab/sourmash
 
 
-Why this implementation ?
-^^^^^^^^^^^^^^^^^^^^^^^^^
+## Why this implementation ?
+
 
 The purpose of this implementation is to provide a library design that is combining flexibility and expressivity with performance
 (speed and memory usage).
