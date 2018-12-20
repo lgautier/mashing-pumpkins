@@ -49,12 +49,14 @@ before_install:
   - pip install codecov
   - pip install pytest --upgrade
   - pip install pytest-cov
+  - pip install flake8
     
 install:
   - python setup.py install
     
 # command to run tests
 script:
+  - flake8 src/minhashsketch.py
   - python -m pytest --cov=mashingpumpkins --cov-report xml --cov-report term src/tests/
   - codecov
   

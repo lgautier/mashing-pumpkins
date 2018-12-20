@@ -8,7 +8,7 @@ from mashingpumpkins.sequence import chunkpos_iter
 class SetSketch(abc.ABC):
 
     _anynew = None
-        
+
     @property
     def maxsize(self):
         """ Maximum size for the sketch. """
@@ -479,7 +479,6 @@ class MinSketch(SetSketch):
 
         if not isinstance(obj, MinSketch):
             raise ValueError('Mismatching sketch type.')
-
 
         if hasattr(obj, "nsize") and (self.nsize != obj.nsize):
             raise ValueError(
