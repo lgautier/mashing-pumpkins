@@ -69,13 +69,11 @@ setup(
     author_email = "lgautier@gmail.com",
     url = "https://github.com/lgautier/mashing-pumpkins",
     packages = [PACKAGENAME,
-                PACKAGENAME + '.tests',
-                PACKAGENAME + '.demo'],
+                PACKAGENAME + '.tests'],
     package_dir = {PACKAGENAME: 'src'},
     ext_modules = [mmh_mod, mmhmash_mod, xxh_mod],
     extras_require = {
-        'test' : ['pytest', 'sourmash'],
-        'demo' : ['sourmash']},
+        'test' : ['pytest']},
     classifiers = CLASSIFIERS)
 
 
