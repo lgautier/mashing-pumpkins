@@ -21,27 +21,7 @@ They have been extensively used for text document matching or retrieval, which c
 extend to the context of genomics where strings are DNA or RNA sequences. There the
 set of k-mers present in a genome (called "k-shingles" in MinHash-related litterature),
 or in the reads from a sequencing assay, and they have been shown to be useful to
-measure similarity between genomes[1].
-
-Sampling subsequences from genome sequences or sequence assays has also been
-demonstrated to be a very efficient approach to identify DNA sequences of unknown
-origin[2], both in terms of accuracy and in terms of usage of bandwidth.
-
-This is making such sketches interesting tools for the analysis of NGS data, with several
-implementations already available[1,3]
-
-1. `MASH`_ (Mash: fast genome and metagenome distance estimation using MinHash. Ondov BD,
-   Treangen TJ, Melsted P, Mallonee AB, Bergman NH, Koren S, Phillippy AM. Genome Biol. 2016
-   Jun 20;17(1):132. doi: 10.1186/s13059-016-0997-x.)
-2. `Tapir/DNAsnout`_ ([Gautier, Laurent, and Ole Lund. "Low-bandwidth and non-compute
-   intensive remote identification of microbes from raw sequencing reads." PloS one 8.12
-   (2013): e83784.](http://dx.doi.org/10.1371/journal.pone.0083784))
-3. `sourmash`_
-
-.. _MASH: https://github.com/marbl/Mash
-.. _Tapir/DNAsnout: https://bitbucket.org/lgautier/dnasnout-client
-.. _sourmash: https://github.com/dib-lab/sourmash
-
+measure similarity between genomes.
 
 ## Why this implementation ?
 
