@@ -44,6 +44,8 @@ The implementation also happens to be pretty fast, making it a reasonable option
 
 ![perf](doc/_static/perf_benchmark.png)
 
+![perf](doc/_static/perf_benchmark_murmur3.png)
+
 At the time of writing it is able to build a minhash sketch (k=31, size=1000) for a FASTQ file with ~21M reads (700MB when gzip-compressed)
 on a laptop[*] in under 1'30".
 
