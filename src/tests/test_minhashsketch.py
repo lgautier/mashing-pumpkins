@@ -244,18 +244,17 @@ def _test_MaxSketch_add_hashvalues(nsize, maxsize, hashfun, seed):
 def test_MaxSketch_add_hashvalues():
 
     nsize = 21
-    maxsize=10
+    maxsize = 10
     hashfun = _murmurhash3.hasharray
     seed = _murmurhash3.DEFAULT_SEED
     sequence, seq_hash, mhs_a = _test_MaxSketch_add_hashvalues(
         nsize, maxsize, hashfun, seed
     )
     mhs_b = MaxSketch(nsize, maxsize, hashfun, seed)
-    hbuffer = array.array('Q', [0, ])
 
     mhs_b.add_hashvalues(x[1] for x in seq_hash)
 
-    assert mhs_b.nvisited == 0 # !!! nvisited it not updated
+    assert mhs_b.nvisited == 0  # !!! nvisited it not updated
     assert len(mhs_b) == maxsize
     assert len(mhs_b._heap) == maxsize
     assert len(mhs_b._heapset) == maxsize
@@ -267,17 +266,15 @@ def test_MaxSketch_add_hashvalues():
 def test_MaxSketch_add_hashvalues_2calls():
 
     nsize = 21
-    maxsize=10
+    maxsize = 10
     hashfun = _murmurhash3.hasharray
     seed = _murmurhash3.DEFAULT_SEED
     sequence, seq_hash, mhs_a = _test_MaxSketch_add_hashvalues(
         nsize, maxsize, hashfun, seed
     )
     mhs_b = MaxSketch(nsize, maxsize, hashfun, seed)
-    hbuffer = array.array('Q', [0, ])
 
     mhs_b = MaxSketch(nsize, maxsize, hashfun, seed)
-    hbuffer = array.array('Q', [0, ])
     i = 3
     mhs_b.add_hashvalues(x[1] for x in seq_hash[:i])
     assert len(mhs_b) < maxsize
@@ -287,7 +284,7 @@ def test_MaxSketch_add_hashvalues_2calls():
 
     mhs_b.add_hashvalues(x[1] for x in seq_hash[i:])
 
-    assert mhs_b.nvisited == 0 # !!! nvisited it not updated
+    assert mhs_b.nvisited == 0  # !!! nvisited it not updated
     assert len(mhs_b) == maxsize
     assert len(mhs_b._heap) == maxsize
     assert len(mhs_b._heapset) == maxsize
@@ -329,7 +326,7 @@ def _test_CountSketch(cls):
     # invalid count/heap combo
     with pytest.raises(ValueError):
         mhs = cls(nsize, maxsize, hashfun, seed,
-                  heap=[(1, 'A'),(1, 'B')],
+                  heap=[(1, 'A'), (1, 'B')],
                   count=Counter([(213, 'AA')]))
 
 
@@ -370,15 +367,15 @@ def _test_CountSketch_add(cls, reverse):
     for h, value in mhs._count.items():
         assert allcounthash[h] == value
 
-    #FIXME: look the tests below
-    #assert len(mhs) == maxsize
-    #assert len(mhs._heap) == maxsize
-    #assert len(mhs._heapset) == maxsize
-    #assert len(mhs._count) == maxsize
-    #assert len(tuple(mhs)) == maxsize
+    # FIXME: look the tests below
+    # assert len(mhs) == maxsize
+    # assert len(mhs._heap) == maxsize
+    # assert len(mhs._heapset) == maxsize
+    # assert len(mhs._count) == maxsize
+    # assert len(tuple(mhs)) == maxsize
 
-    #FIXME: add test for .add_hashvalues
-    #FIXME: add test for .update
+    # FIXME: add test for .add_hashvalues
+    # FIXME: add test for .update
 
 
 def test_MaxCountSketch_add():
@@ -449,7 +446,7 @@ def _test_CountSketch_update(cls, reverse):
         hashfun(ngram, nsize, hbuffer, seed)
         allcounthash[hbuffer[0]] += 1
     maxhash = sorted(allcounthash.keys(), reverse=reverse)[:maxsize]
-    
+
     assert len(set(maxhash) ^ mhs_a._heapset) == 0
 
     for h, value in mhs_a._count.items():
@@ -468,7 +465,7 @@ def test_FrozenSketch():
 
     nsize = 2
     maxsize = 5
-    sketch = set((1,2,3,4,5))
+    sketch = set((1, 2, 3, 4, 5))
     nvisited = len(sketch)
 
     mhs = FrozenSketch(sketch, nsize, maxsize=maxsize, nvisited=nvisited)
@@ -485,7 +482,7 @@ def test_FrozenSketch():
     assert len(mhs) == maxsize
     assert len(mhs._sketch) == maxsize
 
-    sketch = set((1,2,3,6,7))
+    sketch = set((1, 2, 3, 6, 7))
 
     # jaccard_similarity
     assert mhs.jaccard_similarity(mhs) == 1
@@ -520,13 +517,14 @@ def test_FrozenCountSketch():
 
     nsize = 2
     maxsize = 5
-    sketch = set((1,2,3,4,5))
+    sketch = set((1, 2, 3, 4, 5))
     count = Counter()
     for elt in sketch:
         count[elt] = elt*2
     nvisited = len(sketch)
 
-    mhs = FrozenCountSketch(sketch, count, nsize, maxsize = maxsize, nvisited=nvisited)
+    mhs = FrozenCountSketch(sketch, count, nsize, maxsize=maxsize,
+                            nvisited=nvisited)
     assert mhs.maxsize == maxsize
     assert mhs.nsize == nsize
     assert mhs.nvisited == nvisited
@@ -540,26 +538,30 @@ def test_FrozenCountSketch():
     assert len(mhs) == maxsize
     assert len(mhs._sketch) == maxsize
 
-    sketch = set((1,2,3,6,7))
+    sketch = set((1, 2, 3, 6, 7))
 
     # jaccard_similarity
     assert mhs.jaccard_similarity(mhs) == 1
-    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize=maxsize, nvisited=len(sketch))
+    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize=maxsize,
+                              nvisited=len(sketch))
     assert mhs.jaccard_similarity(mhs_b) == 3/7
 
     # jaccard_correspondance
     assert mhs.jaccard_correspondance(mhs) == 1
-    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize=maxsize, nvisited=len(sketch))
+    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize=maxsize,
+                              nvisited=len(sketch))
     assert mhs.jaccard_correspondance(mhs_b) == 3/7
 
     # jaccard_containment
     assert mhs.jaccard_containment(mhs) == 1
-    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize=maxsize, nvisited=len(sketch))
+    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize=maxsize,
+                              nvisited=len(sketch))
     assert mhs.jaccard_containment(mhs_b) == 3/5
 
     # dice_similarity
     assert mhs.dice_similarity(mhs) == 1
-    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize=maxsize, nvisited=len(sketch))
+    mhs_b = FrozenCountSketch(sketch, count, nsize, maxsize=maxsize,
+                              nvisited=len(sketch))
     assert mhs.dice_similarity(mhs_b) == 3/5
 
     # invalid maxsize

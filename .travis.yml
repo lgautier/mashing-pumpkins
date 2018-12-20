@@ -56,7 +56,7 @@ install:
     
 # command to run tests
 script:
-  - flake8 src/minhashsketch.py
+  - flake8 src/minhashsketch.py src/sequence.py src/tests/test_minhashsketch.py src/tests/test_sequence.py
   - python -m pytest --cov=mashingpumpkins --cov-report xml --cov-report term src/tests/
   - codecov
   

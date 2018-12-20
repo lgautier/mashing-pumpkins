@@ -1,6 +1,5 @@
-import pytest
-
 from mashingpumpkins.sequence import chunkpos_iter
+
 
 def test_chunkpos_iter():
 
@@ -11,7 +10,7 @@ def test_chunkpos_iter():
     for slice, check in zip(chunkpos_iter(nsize, len(seq), w),
                             ((0, 5), (3, 8), (6, len(seq)))):
         assert slice == check
-        
+
     w = 8
     for slice, check in zip(chunkpos_iter(nsize, len(seq), w),
                             ((0, 8), (6, len(seq)))):
@@ -22,5 +21,3 @@ def test_chunkpos_iter():
     for slice, check in zip(chunkpos_iter(nsize, len(seq), w),
                             ((0, len(seq)), )):
         assert slice == check
-
-    
