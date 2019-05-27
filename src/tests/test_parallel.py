@@ -80,7 +80,7 @@ def test_sketch_reduce_sketches():
     assert mhs.nsize == mhs_ab.nsize
     assert mhs.maxsize == mhs_ab.maxsize
     assert mhs.nvisited == mhs_ab.nvisited
-    assert len(mhs._heapset ^ mhs_ab._heapset) == 0
+    assert len(set(mhs._heapmap) ^ set(mhs_ab._heapmap)) == 0
 
 
 def test_sketchlist_initializer():
@@ -187,4 +187,4 @@ def test_sketchlist_reduce_sketches():
         assert mhs.nsize == mhs_ab.nsize
         assert mhs.maxsize == mhs_ab.maxsize
         assert mhs.nvisited == mhs_ab.nvisited
-        assert len(mhs._heapset ^ mhs_ab._heapset) == 0
+        assert len(set(mhs._heapmap) ^ set(mhs_ab._heapmap)) == 0

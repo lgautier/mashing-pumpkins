@@ -1,11 +1,87 @@
-import abc
 from heapq import heappush, heapreplace
+import operator
 from collections import Counter
 import array
 from mashingpumpkins.sequence import chunkpos_iter
 
 
-class SetSketch(abc.ABC):
+def make_elt(h, substr, j, nsize):
+    ngram = substr[j:(j+nsize)]
+    return (h, ngram)
+
+
+def _minmaxhash_add_ngrams(
+        heap: list, heapmap: dict, maxsize: int,
+        nsize: int,
+        subs, nsubs: int,
+        hashbuffer, heaptop,
+        extracthash,
+        make_elt, update_elt,
+        replace, anynew, minmax_op) -> int:
+    """
+    Process/add elements to the sketch (See warning below).
+
+    This function is where most of time is spent when building a minhash or a maxhash.
+
+    .. warning::
+
+       If calling this method directly, updating the attribute
+       `nvisited` is under your responsibility.
+
+    :param heap: a heap (in a :class:`list`)
+    :param heapmap: a :class:dict: with the content of the heap (for O(1) lookup of
+        the content of the sketch)
+    :param maxsize: maximum size of the heap
+    :param nsize: size of ngrams
+    :param subs: (sub-)sequence
+    :param nsubs: number of hash values in the hashbuffer
+    :param hashbuffer: buffer with hash values
+    :param heaptop: hash value that is at the top of the heap
+    :param extracthash: function extract the hash from an element
+    :param make_elt: factory to make a new element
+    :param update_elt: in-place update of an element
+    :param replace: callback if replacing
+    :param anynew: callback if new entry
+    :param minmax_op: a pair that is expected to be either (1, `<`) if minhash or
+         (-1, `>`) if maxhash.
+
+    :return: new hash value for heaptop.
+    """
+
+    lheap = len(heap)
+    sign, comparator = minmax_op
+
+    for j in range(nsubs):
+        h = hashbuffer[j]
+        if h not in heapmap:
+            if lheap < maxsize:
+                elt = make_elt(sign * h, subs, j, nsize)
+                # Add element to set and heap.
+                heapmap[h] = elt
+                heappush(heap, elt)
+
+                heaptop = extracthash(heap[0])
+                lheap += 1
+                if anynew is not None:
+                    anynew(h)
+            elif comparator(h, heaptop):
+                elt = make_elt(sign * h, subs, j, nsize)
+                # Replace the maximum value in the heap.
+                heapmap[h] = elt
+                out = heapreplace(heap, elt)
+                del(heapmap[sign * out[0]])
+                # The negative of the hash is needed for MinHash.
+                heaptop = sign * heap[0][0]
+                if anynew is not None:
+                    anynew(h)
+        else:
+            if update_elt is not None:
+                elt = heapmap[h]
+                update_elt(elt)
+    return heaptop
+
+
+class SetSketch(object):
 
     _anynew = None
 
@@ -53,7 +129,7 @@ class SetSketch(abc.ABC):
             self._heap = list()
         else:
             self._heap = heap
-        self._heapset = set(self._heap)
+        self._heapmap = dict(self._heap)
         self._nvisited = nvisited
 
     def __len__(self):
@@ -69,7 +145,7 @@ class SetSketch(abc.ABC):
 
         - elt: an object as returned by the method `make_elt(h, obj)`
         """
-        return elt in self._heapset
+        return elt in self._heapmap
 
     def _add_elt_unsafe(self, h, elt):
         """
@@ -82,7 +158,7 @@ class SetSketch(abc.ABC):
         any property (if MaxHash, that is all elements in the sketch
         are the `maxsize` elements with the highest hash values).
         """
-        self._heapset.add(h)
+        self._heapmap[h] = elt
         heappush(self._heap, elt)
 
     def _replace(self, h, elt):
@@ -92,10 +168,10 @@ class SetSketch(abc.ABC):
         - h: a hash value
         - elt: an object as returned by the method `make_elt(h, obj)`
         """
-        heapset = self._heapset
-        heapset.add(h)
+        heapmap = self._heapmap
+        heapmap[h] = elt
         out = heapreplace(self._heap, elt)
-        heapset.remove(self._extracthash(out))
+        del(heapmap[self._extracthash(out)])
         return out
 
     def __add__(self, obj):
@@ -170,7 +246,7 @@ class SetSketch(abc.ABC):
             self._nvisited += nsubs
 
     def freeze(self):
-        return FrozenSketch(self._heapset, self.nsize,
+        return FrozenSketch(self._heapmap, self.nsize,
                             self._hashfun,
                             seed=self.seed,
                             maxsize=self.maxsize,
@@ -184,20 +260,8 @@ class MaxSketch(SetSketch):
     """
 
     _initheap = 0
-
-    @staticmethod
-    def _make_elt(h, obj):
-        """
-        Make an element to store into the sketch
-
-        - h: a hash value
-        - obj: arbitraty object to store with the hash
-        """
-        return (h, obj)
-
-    @staticmethod
-    def _extracthash(elt):
-        return elt[0]
+    _make_elt = staticmethod(make_elt)
+    _extracthash = staticmethod(operator.itemgetter(0))
 
     def add_hashvalues(self, values):
         """
@@ -213,26 +277,25 @@ class MaxSketch(SetSketch):
         anynew = self._anynew
         extracthash = self._extracthash
         heap = self._heap
-        heapset = self._heapset
+        heapmap = self._heapmap
         maxsize = self._maxsize
         lheap = len(heap)
         if lheap > 0:
             heaptop = extracthash(heap[0])
         else:
             heaptop = None
-        ngram = None
         for h in values:
             if lheap < maxsize:
-                if h not in heapset:
-                    elt = make_elt(h, ngram)
+                if h not in heapmap:
+                    elt = make_elt(h, '', 0, 0)
                     self._add_elt_unsafe(h, elt)
                     heaptop = extracthash(heap[0])
                     lheap += 1
                 if anynew is not None:
                     anynew(elt)
             elif h >= heaptop:
-                if h not in heapset:
-                    elt = make_elt(h, ngram)
+                if h not in heapmap:
+                    elt = make_elt(h, '', 0, 0)
                     self._replace(h, elt)
                     heaptop = extracthash(heap[0])
                 if anynew is not None:
@@ -256,32 +319,12 @@ class MaxSketch(SetSketch):
         - anynew:
         """
 
-        nsize = self._nsize
-        heap = self._heap
-        lheap = len(heap)
-        heapset = self._heapset
-        maxsize = self._maxsize
-
-        for j in range(nsubs):
-            h = hashbuffer[j]
-            if lheap < maxsize:
-                if h not in heapset:
-                    ngram = subs[j:(j+nsize)]
-                    elt = make_elt(h, ngram)
-                    self._add_elt_unsafe(h, elt)
-                    heaptop = extracthash(heap[0])
-                    lheap += 1
-                if anynew is not None:
-                    anynew(h)
-            elif h >= heaptop:
-                if h not in heapset:
-                    ngram = subs[j:(j+nsize)]
-                    elt = make_elt(h, ngram)
-                    replace(h, elt)
-                    heaptop = extracthash(heap[0])
-                if anynew is not None:
-                    anynew(h)
-        return heaptop
+        return _minmaxhash_add_ngrams(
+            self._heap, self._heapmap, self._maxsize,
+            self._nsize,
+            subs, nsubs,
+            hashbuffer, heaptop,
+            extracthash, make_elt, None, replace, anynew, (+1, operator.ge))
 
     def update(self, obj):
         """
@@ -312,7 +355,7 @@ class MaxSketch(SetSketch):
         extracthash = self._extracthash
         heap = self._heap
         lheap = len(heap)
-        heapset = self._heapset
+        heapmap = self._heapmap
         maxsize = self._maxsize
         if lheap > 0:
             heaptop = extracthash(heap[0])
@@ -322,7 +365,7 @@ class MaxSketch(SetSketch):
         for elt in obj:
             h = extracthash(elt)
             if lheap < maxsize:
-                if h not in heapset:
+                if h not in heapmap:
                     self._add_elt_unsafe(h, elt)
                     heaptop = extracthash(heap[0])
                     lheap += 1
@@ -330,7 +373,7 @@ class MaxSketch(SetSketch):
                 # if anynew is not None:
                 #     anynew(h)
             if h >= heaptop:
-                if h not in heapset:
+                if h not in heapmap:
                     self._replace(h, elt)
                     heaptop = extracthash(heap[0])
                 # no anynew: responsibility of child class
@@ -348,25 +391,8 @@ class MinSketch(SetSketch):
 
     _initheap = 0
 
-    @staticmethod
-    def _extracthash(elt):
-        """
-        Extract the hash value for an element (see method `_make_elt(h, obj)`).
-        This is overriding the parent class' method by returning the opposite
-        value (the parent class build top-sketches, taking the opposite allows
-        us to reuse a lot of the code).
-        """
-        return -elt[0]
-
-    @staticmethod
-    def _make_elt(h, obj):
-        """
-        Make an element to store into the sketch
-
-        - h: an integer hash value
-        - obj: arbitraty object to store with the hash
-        """
-        return (-h, obj)
+    _make_elt = staticmethod(make_elt)
+    _extracthash = staticmethod(lambda x: -x[0])
 
     def _replace(self, h, elt):
         """
@@ -375,10 +401,10 @@ class MinSketch(SetSketch):
         - h: a hash value
         - elt: an object as returned by the method `make_elt(h, obj)`
         """
-        heapset = self._heapset
-        heapset.add(h)
+        heapmap = self._heapmap
+        heapmap[h] = elt
         out = heapreplace(self._heap, elt)
-        heapset.remove(self._extracthash(out))
+        del(heapmap[self._extracthash(out)])
         return out
 
     def _add(self, subs, nsubs, hashbuffer, heaptop,
@@ -401,34 +427,13 @@ class MinSketch(SetSketch):
            `nvisited` is under your responsibility.
 
         """
-
-        nsize = self._nsize
-        heap = self._heap
-        lheap = len(heap)
-        heapset = self._heapset
-        maxsize = self._maxsize
-
-        for j in range(nsubs):
-            h = hashbuffer[j]
-            if lheap < maxsize:
-                if h not in heapset:
-                    ngram = subs[j:(j+nsize)]
-                    elt = make_elt(h, ngram)
-                    self._add_elt_unsafe(h, elt)
-                    heaptop = extracthash(heap[0])
-                    lheap += 1
-                if anynew is not None:
-                    anynew(h)
-            elif h <= heaptop:
-                if h not in heapset:
-                    ngram = subs[j:(j+nsize)]
-                    elt = make_elt(h, ngram)
-                    replace(h, elt)
-                    heaptop = extracthash(heap[0])
-                if anynew is not None:
-                    anynew(h)
-
-        return heaptop
+        return _minmaxhash_add_ngrams(
+            self._heap, self._heapmap, self._maxsize,
+            self._nsize,
+            subs, nsubs,
+            hashbuffer, heaptop,
+            extracthash, make_elt, None, replace, anynew,
+            (-1, operator.le))
 
     def add_hashvalues(self, values):
         """
@@ -444,26 +449,25 @@ class MinSketch(SetSketch):
         anynew = self._anynew
         extracthash = self._extracthash
         heap = self._heap
-        heapset = self._heapset
+        heapmap = self._heapmap
         maxsize = self._maxsize
         lheap = len(heap)
         if lheap > 0:
             heaptop = extracthash(heap[0])
         else:
             heaptop = None
-        ngram = None
         for h in values:
             if lheap < maxsize:
-                if h not in heapset:
-                    elt = make_elt(h, ngram)
+                if h not in heapmap:
+                    elt = make_elt(-h, '', 0, 0)
                     self._add_elt_unsafe(h, elt)
                     heaptop = extracthash(heap[0])
                     lheap += 1
                 if anynew is not None:
                     anynew(elt)
             elif h <= heaptop:
-                if h not in heapset:
-                    elt = make_elt(h, ngram)
+                if h not in heapmap:
+                    elt = make_elt(-h, '', 0, 0)
                     self._replace(h, elt)
                     heaptop = extracthash(heap[0])
                 if anynew is not None:
@@ -500,7 +504,7 @@ class MinSketch(SetSketch):
         extracthash = self._extracthash
         heap = self._heap
         lheap = len(heap)
-        heapset = self._heapset
+        heapmap = self._heapmap
         maxsize = self._maxsize
         if lheap > 0:
             heaptop = extracthash(heap[0])
@@ -510,7 +514,7 @@ class MinSketch(SetSketch):
         for elt in obj:
             h = extracthash(elt)
             if lheap < maxsize:
-                if h not in heapset:
+                if h not in heapmap:
                     self._add_elt_unsafe(h, elt)
                     heaptop = extracthash(heap[0])
                     lheap += 1
@@ -518,7 +522,7 @@ class MinSketch(SetSketch):
                 # if anynew is not None:
                 #     anynew(h)
             if h <= heaptop:
-                if h not in heapset:
+                if h not in heapmap:
                     self._replace(h, elt)
                     heaptop = extracthash(heap[0])
                 # no anynew: responsibility of child class
@@ -549,11 +553,11 @@ class CountTrait(object):
         """
         super().update(obj)
         count = self._count
-        for k in self._heapset:
+        for k in self._heapmap:
             count[k] += obj._count[k]
 
     def freeze(self):
-        return FrozenCountSketch(self._heapset, self._count, self._nsize,
+        return FrozenCountSketch(self._heapmap, self._count, self._nsize,
                                  self._hashfun,
                                  seed=self.seed,
                                  maxsize=self.maxsize,
@@ -595,7 +599,7 @@ class MaxCountSketch(MaxSketch, CountTrait):
                     else:
                         count[h] = 1
         else:
-            if len(self._heapset ^ set(count.keys())) > 0:
+            if len(set(self._heapmap) ^ set(count.keys())) > 0:
                 raise ValueError(
                     'Mismatching keys with the parameter `count`.'
                 )
@@ -639,7 +643,7 @@ class MinCountSketch(MinSketch, CountTrait):
                     else:
                         count[h] = 1
         else:
-            if len(self._heapset ^ set(count.keys())) > 0:
+            if len(set(self._heapmap) ^ set(count.keys())) > 0:
                 raise ValueError(
                     'Mismatching keys with the parameter `count`.')
         self._count = count

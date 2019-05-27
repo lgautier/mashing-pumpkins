@@ -48,7 +48,7 @@ def _test_MinMaxSketch_add(sequence, nsize, maxsize, hashfun, seed, cls):
         # check that the minhash sketch is full
         assert len(mhs) == maxsize
         assert len(mhs._heap) == maxsize
-        assert len(mhs._heapset) == maxsize
+        assert len(mhs._heapmap) == maxsize
         assert len(tuple(mhs)) == maxsize
 
     allhash = _allngramshashed(sequence, nsize, hashfun, seed, hashreverse)
@@ -57,7 +57,7 @@ def _test_MinMaxSketch_add(sequence, nsize, maxsize, hashfun, seed, cls):
     maxhash = set(x[0] for x in allhash[:maxsize])
 
     # check that the slice above matches the content of the maxhash sketch
-    assert len(maxhash ^ mhs._heapset) == 0
+    assert len(maxhash ^ set(mhs._heapmap)) == 0
 
 
 def create_minmaxsketch(cls, hashmodule, nsize, maxsize):
@@ -168,10 +168,10 @@ def _test_MinMaxSketch_update(sequence, maxsize, methodname, cls):
     assert res.nvisited == mhs.nvisited
     assert len(res) == len(mhs)
     assert len(res._heap) == len(mhs._heap)
-    assert len(res._heapset) == len(mhs._heapset)
+    assert len(res._heapmap) == len(mhs._heapmap)
     assert len(tuple(res)) == len(tuple(mhs))
 
-    assert len(res._heapset ^ mhs._heapset) == 0
+    assert len(set(res._heapmap) ^ set(mhs._heapmap)) == 0
 
 
 @pytest.mark.parametrize('cls', (MinSketch, MaxSketch))
@@ -238,7 +238,7 @@ def test_MaxSketch_add_hashvalues():
     assert mhs_b.nvisited == 0  # !!! nvisited it not updated
     assert len(mhs_b) == maxsize
     assert len(mhs_b._heap) == maxsize
-    assert len(mhs_b._heapset) == maxsize
+    assert len(mhs_b._heapmap) == maxsize
     assert len(tuple(mhs_b)) == maxsize
 
     assert len(set(x[0] for x in mhs_a) ^ set(x[0] for x in mhs_b)) == 0
@@ -260,7 +260,7 @@ def test_MaxSketch_add_hashvalues_2calls():
     mhs_b.add_hashvalues(x[1] for x in seq_hash[:i])
     assert len(mhs_b) < maxsize
     assert len(mhs_b._heap) < maxsize
-    assert len(mhs_b._heapset) < maxsize
+    assert len(mhs_b._heapmap) < maxsize
     assert len(tuple(mhs_b)) < maxsize
 
     mhs_b.add_hashvalues(x[1] for x in seq_hash[i:])
@@ -268,7 +268,7 @@ def test_MaxSketch_add_hashvalues_2calls():
     assert mhs_b.nvisited == 0  # !!! nvisited it not updated
     assert len(mhs_b) == maxsize
     assert len(mhs_b._heap) == maxsize
-    assert len(mhs_b._heapset) == maxsize
+    assert len(mhs_b._heapmap) == maxsize
     assert len(tuple(mhs_b)) == maxsize
 
     assert len(set(x[0] for x in mhs_a) ^ set(x[0] for x in mhs_b)) == 0
@@ -338,7 +338,7 @@ def test_CountSketch_add(cls, reverse):
         hashfun(ngram, nsize, hbuffer, seed)
         allcounthash[hbuffer[0]] += 1
     maxhash = sorted(allcounthash.keys(), reverse=reverse)[:maxsize]
-    assert len(set(maxhash) ^ mhs._heapset) == 0
+    assert len(set(maxhash) ^ set(mhs._heapmap)) == 0
 
     for h, value in mhs._count.items():
         assert allcounthash[h] == value
@@ -374,7 +374,7 @@ def test_CountSketch_freeze(cls):
     assert mhs.nsize == fmhs.nsize
     assert mhs.nvisited == fmhs.nvisited
 
-    assert len(mhs._heapset ^ fmhs._sketch) == 0
+    assert len(set(mhs._heapmap) ^ fmhs._sketch) == 0
 
 
 @pytest.mark.parametrize('cls,reverse', ((MinCountSketch, False),
@@ -411,7 +411,7 @@ def test_CountSketch_update(cls, reverse):
         allcounthash[hbuffer[0]] += 1
     maxhash = sorted(allcounthash.keys(), reverse=reverse)[:maxsize]
 
-    assert len(set(maxhash) ^ mhs_a._heapset) == 0
+    assert len(set(maxhash) ^ set(mhs_a._heapmap)) == 0
 
     for h, value in mhs_a._count.items():
         assert allcounthash[h] == value
