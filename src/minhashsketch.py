@@ -21,7 +21,8 @@ def _minmaxhash_add_ngrams(
     """
     Process/add elements to the sketch (See warning below).
 
-    This function is where most of time is spent when building a minhash or a maxhash.
+    This function is where most of time is spent when building a minhash or
+    a maxhash.
 
     .. warning::
 
@@ -29,8 +30,8 @@ def _minmaxhash_add_ngrams(
        `nvisited` is under your responsibility.
 
     :param heap: a heap (in a :class:`list`)
-    :param heapmap: a :class:dict: with the content of the heap (for O(1) lookup of
-        the content of the sketch)
+    :param heapmap: a :class:dict: with the content of the heap (for O(1)
+        lookup of the content of the sketch)
     :param maxsize: maximum size of the heap
     :param nsize: size of ngrams
     :param subs: (sub-)sequence
@@ -42,8 +43,8 @@ def _minmaxhash_add_ngrams(
     :param update_elt: in-place update of an element
     :param replace: callback if replacing
     :param anynew: callback if new entry
-    :param minmax_op: a pair that is expected to be either (1, `<`) if minhash or
-         (-1, `>`) if maxhash.
+    :param minmax_op: a pair that is expected to be either (1, `<`) if
+        minhash or (-1, `>`) if maxhash.
 
     :return: new hash value for heaptop.
     """
