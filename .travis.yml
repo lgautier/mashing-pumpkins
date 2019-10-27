@@ -26,6 +26,11 @@ matrix:
       compiler: gcc
       dist: xenial
       sudo: true
+     - os: linux
+      python: 3.8
+      compiler: gcc
+      dist: xenial
+      sudo: true
     - os: osx
       python: 3.5
       compiler: clang
@@ -44,6 +49,12 @@ matrix:
     - os: osx
       python: 3.7
       compiler: gcc
+    - os: osx
+      python: 3.8
+      compiler: clang
+    - os: osx
+      python: 3.8
+      compiler: gcc      
 
 before_install:
   - pip install codecov
