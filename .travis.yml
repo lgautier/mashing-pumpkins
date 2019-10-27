@@ -26,7 +26,7 @@ matrix:
       compiler: gcc
       dist: xenial
       sudo: true
-     - os: linux
+    - os: linux
       python: 3.8
       compiler: gcc
       dist: xenial
@@ -54,20 +54,23 @@ matrix:
       compiler: clang
     - os: osx
       python: 3.8
-      compiler: gcc      
+      compiler: gcc
 
 before_install:
   - pip install codecov
   - pip install pytest --upgrade
   - pip install pytest-cov
   - pip install flake8
-    
+
 install:
   - python setup.py install
-    
+
 # command to run tests
 script:
-  - flake8 src/minhashsketch.py src/sequence.py src/tests/test_minhashsketch.py src/tests/test_sequence.py
-  - python -m pytest --cov=mashingpumpkins --cov-report xml --cov-report term src/tests/
+  - |
+    flake8 src/minhashsketch.py src/sequence.py \
+    src/tests/test_minhashsketch.py src/tests/test_sequence.py
+  - |
+    python -m pytest --cov=mashingpumpkins --cov-report xml --cov-report term \
+    src/tests/
   - codecov
-  
