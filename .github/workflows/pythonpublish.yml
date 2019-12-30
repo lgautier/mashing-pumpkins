@@ -33,6 +33,7 @@ jobs:
         cp "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\x86_amd64\rc.exe" "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin"
         cp "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\x86_amd64\rcdll.dll" "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin"
     - name: Build
+      run: |
         python setup.py sdist bdist_wheel
     - name: Upload artifact
       uses: actions/upload-artifact@master
