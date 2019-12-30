@@ -59,15 +59,17 @@ xxh_mod = Extension("%s._xxhash" % PACKAGENAME,
                     language="c",
                     extra_compile_args = (
                         extra_compile_args +
-                        ['-O3',
-                         '-std=c99',
-                         '-Wall', '-Wcast-qual',
+                        ['-std=c99',
+                         '-Wall',
                          '-Wcast-align', '-Wshadow',
                          '-Wstrict-aliasing=1', '-Wswitch-enum',
                          '-Wdeclaration-after-statement',
                          '-Wstrict-prototypes', '-Wundef'] +
-                        ([] if sys.platform == 'windows' else ['-Wextra']))
+                        (['-O2', '-c', '-DXXH_MULTI_TARGET=1']
+                         if sys.platform == 'windows'
+                         else ['-O3', '-Wextra', '-Wcast-qual'])
                     )
+)
 
 setup(
     name=PYPINAME,
