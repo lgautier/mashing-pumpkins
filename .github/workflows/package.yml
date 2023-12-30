@@ -78,7 +78,7 @@ jobs:
       env:
           CIBW_SKIP: cp36-* cp37-*
           CIBW_ARCHS_LINUX: "auto aarch64"
-          CIBW_ARCHS_MACOS: "x86_64 arm64"
+          CIBW_ARCHS_MACOS: "x86_64 arm64 universal2"
           CIBW_BUILD_VERBOSITY: 1
       with:
         output-dir: wheelhouse
