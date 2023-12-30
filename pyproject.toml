@@ -1,0 +1,46 @@
+[build-system]
+requires = [
+    "setuptools >= 61",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mashing-pumpkins"
+version = "0.3.0"
+description = "Hash sketches of sequences"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Laurent Gautier", email = "lgautier@gmail.com" }]
+classifiers = [
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: POSIX :: Linux',
+    'Programming Language :: C++',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Topic :: Scientific/Engineering',
+]
+dependencies = [
+]
+
+[project.optional-dependencies]
+test = ["pytest", "coverage", "pytest-cov"]
+
+[project.urls]
+Homepage = "https://lgautier.github.io/mashing-pumpkins"
+Documentation = "https://lgautier.github.io/mashing-pumpkins/version/master/html/index.html"
+Source = "https://github.com/lgautier/mashing-pumpkins"
+Tracker = "https://github.com/lgautier/mashing-pumpkins/issue"
+
+[tool.setuptools]
+packages = [
+    "mashingpumpkins",
+    "mashingpumpkins.tests",
+]
+# zip_safe = false # not supported as of setuptools==62.3.2

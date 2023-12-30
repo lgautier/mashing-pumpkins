@@ -9,21 +9,8 @@ VERSION="0.3.0"
 
 extra_compile_args = ['-pedantic']
 
-CLASSIFIERS = [
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: POSIX :: Linux",
-    "Programming Language :: C++",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Topic :: Scientific/Engineering",
-]
-
-if tuple(sys.version_info[:2]) < (3, 5):
-    print("Error: Python >= 3.5 is *required*.")
+if tuple(sys.version_info[:2]) < (3, 8):
+    print("Error: Python >= 3.8 is *required*.")
     sys.exit(1)
 
 if sys.platform == 'darwin':
@@ -63,20 +50,24 @@ xxh_mod = Extension("%s._xxhash" % PACKAGENAME,
                      '-Wstrict-prototypes', '-Wundef'])
 
 setup(
-    name = PYPINAME,
-    version = VERSION,
-    description = "Hash sketches of sequences",
-    license = "MIT",
-    author = "Laurent Gautier",
-    author_email = "lgautier@gmail.com",
-    url = "https://github.com/lgautier/mashing-pumpkins",
     packages = [PACKAGENAME,
                 PACKAGENAME + '.tests'],
     package_dir = {PACKAGENAME: 'src'},
     ext_modules = [mmh_mod, mmhmash_mod, xxh_mod],
-    extras_require = {
-        'test' : ['pytest']},
-    classifiers = CLASSIFIERS)
+)
 
 
 
+
+faf_mod = Extension('%s._fastqandfurious' % PACKAGENAME,
+                    sources=['src/_fastqandfurious.c', ],
+                    #depends=['src/.h'],
+                    #include_dirs=['src',],
+                    language='c',
+                    extra_compile_args=(extra_compile_args +
+                                        ['-O3', '-std=c99']))
+
+setup(
+    package_dir = {PACKAGENAME: 'src'}, 
+    ext_modules = [faf_mod, ]
+)
