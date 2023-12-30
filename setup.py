@@ -55,19 +55,3 @@ setup(
     package_dir = {PACKAGENAME: 'src'},
     ext_modules = [mmh_mod, mmhmash_mod, xxh_mod],
 )
-
-
-
-
-faf_mod = Extension('%s._fastqandfurious' % PACKAGENAME,
-                    sources=['src/_fastqandfurious.c', ],
-                    #depends=['src/.h'],
-                    #include_dirs=['src',],
-                    language='c',
-                    extra_compile_args=(extra_compile_args +
-                                        ['-O3', '-std=c99']))
-
-setup(
-    package_dir = {PACKAGENAME: 'src'}, 
-    ext_modules = [faf_mod, ]
-)
