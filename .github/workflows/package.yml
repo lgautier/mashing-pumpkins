@@ -1,0 +1,128 @@
+name: Python package
+
+on: [push, pull_request]
+
+jobs:
+  code-qc:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    - name: Lint with flake8
+      run: |
+        python -m pip install flake8
+	flake8 src/
+  build-sdist:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    - name: Set up R ${{ matrix.r-version }}
+      uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: release
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install setuptools build
+    - name: Build sdist
+      run: |
+        python -m build -o dist/ --sdist .
+    - name: Upload source package.
+      uses: actions/upload-artifact@v3
+      with:
+        name: mashing-pumkins-sdist
+        path: dist/mashing-pumpkins-*.tar.gz
+  build-wheel-posix:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      packages: read
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: 39
+            platform_id: manylinux2014
+          - os: macos-11
+            python: 310
+            platform_id: macosx_x86_64
+          - os: macos-11
+            python: 310
+            platform_id: macosx_arm64
+          - os: macos-12
+            python: 310
+            platform_id: macosx_arm64
+          - os: macos-13
+            python: 310
+            platform_id: macosx_arm64
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install setuptools build cibuildwheel
+    - name: Build wheel
+      uses: pypa/cibuildwheel@v2.16.2
+      env:
+          CIBW_SKIP: cp36-* cp37-*
+          CIBW_ARCHS_LINUX: "auto aarch64"
+          CIBW_ARCHS_MACOS: "x86_64 arm64"
+          CIBW_BUILD_VERBOSITY: 1
+      with:
+        output-dir: wheelhouse
+        config-file: pyproject.toml
+    - name: Upload wheels
+      uses: actions/upload-artifact@v3
+      with:
+          name: binary-wheels-${{ matrix.platform_id }}
+          path: wheelhouse/*.whl
+  test:
+    needs: [build-sdist]
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+        r-version: ['release']
+        os: [ubuntu-latest, ubuntu-20.04, macOS-latest]
+        venv_activate: ["source pyenv_base/bin/activate"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Create base virtualenv (non-windows)
+      run: |
+        python -m venv pyenv_base
+        ${{ matrix.venv_activate }}
+        python -m  pip install -U pip wheel
+    - uses: actions/download-artifact@v3
+      with:
+        name: mashing-pumpkins-sdist
+        path: dist/
+    - name: Source package path.
+      shell: bash
+      run: echo "SRC_DIST=$(ls -1 dist/*.tar.gz | tail -n 1)" >> $GITHUB_ENV
+    - name: Install package (non-Windows)
+      run: |
+        ${{ matrix.venv_activate }}
+        pip install $SRC_DIST
+    - name: Test
+      run: |
+        ${{ matrix.venv_activate }}
+        python -m pip install $SRC_DIST'[test_minimal]'
+        pytest src/tests/

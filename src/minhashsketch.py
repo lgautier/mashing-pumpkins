@@ -70,7 +70,7 @@ def _minmaxhash_add_ngrams(
                 # Replace the maximum value in the heap.
                 heapmap[h] = elt
                 out = heapreplace(heap, elt)
-                del(heapmap[sign * out[0]])
+                del (heapmap[sign * out[0]])
                 # The negative of the hash is needed for MinHash.
                 heaptop = sign * heap[0][0]
                 if anynew is not None:
@@ -172,7 +172,7 @@ class SetSketch(object):
         heapmap = self._heapmap
         heapmap[h] = elt
         out = heapreplace(self._heap, elt)
-        del(heapmap[self._extracthash(out)])
+        del (heapmap[self._extracthash(out)])
         return out
 
     def __add__(self, obj):
@@ -405,7 +405,7 @@ class MinSketch(SetSketch):
         heapmap = self._heapmap
         heapmap[h] = elt
         out = heapreplace(self._heap, elt)
-        del(heapmap[self._extracthash(out)])
+        del (heapmap[self._extracthash(out)])
         return out
 
     def _add(self, subs, nsubs, hashbuffer, heaptop,
@@ -541,7 +541,7 @@ class CountTrait(object):
 
     def _replace(self, h, elt):
         out = super()._replace(h, elt)
-        del(self._count[self._extracthash(out)])
+        del (self._count[self._extracthash(out)])
         return out
 
     def _anynew(self, h):
