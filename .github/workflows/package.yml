@@ -60,7 +60,7 @@ jobs:
           - os: macos-12
             python: 310
             platform_id: macosx_arm64
-          - os: macos-12-large
+          - os: macos-12
             python: 310
             platform_id: macosx_arm64
     steps:
