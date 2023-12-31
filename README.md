@@ -3,7 +3,7 @@
 
 Flexible-yet-pretty-fast minhashing-related library for Python >= 3.5.
 
-[![Build Status](https://travis-ci.org/lgautier/mashing-pumpkins.svg?branch=master)](https://travis-ci.org/lgautier/mashing-pumpkins)
+[![Python package](https://github.com/lgautier/mashing-pumpkins/actions/workflows/package.yml/badge.svg)](https://github.com/lgautier/mashing-pumpkins/actions/workflows/package.yml)
 [![codecov](https://codecov.io/gh/lgautier/mashing-pumpkins/branch/master/graph/badge.svg)](https://codecov.io/gh/lgautier/mashing-pumpkins)
 [![Pypi release](https://img.shields.io/pypi/v/mashing-pumpkins.svg)](https://img.shields.io/pypi/v/mashing-pumpkins.svg)
 
