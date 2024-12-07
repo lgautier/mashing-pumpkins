@@ -51,18 +51,9 @@ jobs:
           - os: ubuntu-latest
             python: 39
             platform_id: manylinux2014
-          - os: macos-11
+          - os: macos-14
             python: 310
             platform_id: macosx_x86_64
-          - os: macos-11
-            python: 310
-            platform_id: macosx_arm64
-          - os: macos-12
-            python: 310
-            platform_id: macosx_arm64
-          - os: macos-12
-            python: 310
-            platform_id: macosx_arm64
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -76,7 +67,7 @@ jobs:
     - name: Build wheel
       uses: pypa/cibuildwheel@v2.16.2
       env:
-          CIBW_SKIP: cp36-* cp37-*
+          CIBW_SKIP: cp36-* cp37-* cp38-*
           CIBW_ARCHS_LINUX: "auto aarch64"
           CIBW_ARCHS_MACOS: "x86_64 arm64 universal2"
           CIBW_BUILD_VERBOSITY: 1
