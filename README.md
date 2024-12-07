@@ -59,7 +59,7 @@ Processing DRR065801.fastq.gz as a FASTQ file...
 
 ## Installation
 
-Python 3.5, 3.6, 3.7 and a C/C++ compiler (C99-aware) are pretty much everything that is needed. At the time of writing the CI
+Python > 3.8 and a C/C++ compiler (C99-aware) are pretty much everything that is needed. At the time of writing the CI
 on Travis is testing with gcc and clang on Linux and OSX.
 
 With pip, installing either latest release or the "master" branch can be done with:
