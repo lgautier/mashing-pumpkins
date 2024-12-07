@@ -6,27 +6,31 @@ Utilities to handle sequences
 def chunkpos_iter(nsize: int, lseq: int, w: int) -> (int, int):
     """
     Iterator of chunk indices.
-
+    
     This is made to split a long sequence for the purpose of parallel
-    computing on its constituting ngrams/kmers while not using any
-    around the split points.
-
+    computing on its constituting ngrams/kmers while ensuring no
+    duplicates or misses around the split points.
+    
     For example, a sequence of length 10 for which we want
     ngrams/kmers of length 3 can be decomposed into the following
-    chunks of length 5 would be split into the following 3 chunks:
+    chunks of length 5:
+    
+    .. code-block:: text
+       
+       |0 1 2 3 4 5 6 7 8 9|
+        |---------|     :  :
+        :     |---------|  :
+        :     :   : |------|
+        0     :   5 :   :  :
+              3     :   8  :
+                    6      |10
 
-    |0 1 2 3 4 5 6 7 8 9|
-     |---------|     :  :
-     :     |---------|  :
-     :     :   : |------|
-     0     :   5 :   :  :
-           3     :   8  :
-                 6      |
+    Depending of the combination of parameters, last chunk may be be shorter
+    than the desired size `w`.
 
-    - nsize: n in ngram
-    - lseq: length of sequence to chunk
-    - w: width of window
-
+    :param:nsize: n in ngram
+    :param:lseq: length of sequence to chunk
+    :param:w: width of window (that is the desired length/size of the chunk)
     """
 
     assert nsize <= w

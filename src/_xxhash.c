@@ -83,6 +83,6 @@ PyInit__xxhash(void)
     }
 
     PyModule_AddIntConstant(m, "DEFAULT_SEED", XXH_DEFAULT_SEED);
-	
+    
     return m;
 }

@@ -6,7 +6,7 @@
 mashing-pumpkins : m(in|ax)hash
 ===============================
 
-Flexible-yet-pretty-fast minhash/maxhash-related library for Python >= 3.5.
+Flexible-yet-pretty-fast minhash/maxhash-related library for Python > 3.8.
 
 .. toctree::
    :maxdepth: 2
@@ -233,8 +233,8 @@ function returns a non-numerical only use :class:`MaxSketch`.
 An other example is when all elements in the input set are :class:`bytes` and
 the common hashing function SHA1 is wanted. In that case the hashing function
 would look like follows. Note that hashing function can return non-numerical
-values and the hashing function will plainly ignore the :param:`size` and
-:param:`buffer` as no sliding window is wanted.
+values and the hashing function will plainly ignore parameters `size` and
+`buffer` as no sliding window is wanted.
 
 .. code-block:: python
 
