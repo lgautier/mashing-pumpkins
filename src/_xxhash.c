@@ -67,7 +67,7 @@ static PyMethodDef xxhashModuleMethods[] = {
 static struct PyModuleDef moduledef = {
   PyModuleDef_HEAD_INIT,
   "_xxhash",
-  "Utilities to compute XXHash.",
+  "",
   -1,
   xxhashModuleMethods};
 
