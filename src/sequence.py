@@ -6,15 +6,15 @@ Utilities to handle sequences
 def chunkpos_iter(nsize: int, lseq: int, w: int) -> (int, int):
     """
     Iterator of chunk indices.
-    
+
     This is made to split a long sequence for the purpose of parallel
     computing on its constituting ngrams/kmers while ensuring no
     duplicates or misses around the split points.
-    
+
     For example, a sequence of length 10 for which we want
     ngrams/kmers of length 3 can be decomposed into the following
     chunks of length 5:
-    
+
     .. code-block:: text
        
        |0 1 2 3 4 5 6 7 8 9|
