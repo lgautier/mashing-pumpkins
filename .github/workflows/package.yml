@@ -37,7 +37,7 @@ jobs:
     - name: Upload source package.
       uses: actions/upload-artifact@v4
       with:
-        name: mashing-pumkins-sdist
+        name: mashing-pumpkins-sdist
         path: dist/mashing_pumpkins-*.tar.gz
   build-wheel-posix:
     runs-on: ${{ matrix.os }}
