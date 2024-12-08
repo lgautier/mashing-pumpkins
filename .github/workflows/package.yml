@@ -103,7 +103,6 @@ jobs:
         pattern: mashing-pumpkins-sdist
         path: dist/
     - name: Source package path.
-      shell: bash
       run: |
         ls -l dist/
         ls -l dist/mashing-pumpkins-sdist
