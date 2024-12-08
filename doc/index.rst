@@ -1,8 +1,3 @@
-.. mashing-pumpkins documentation master file, created by
-   sphinx-quickstart on Mon Jan 23 15:17:43 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 mashing-pumpkins : m(in|ax)hash
 ===============================
 
@@ -11,9 +6,6 @@ Flexible-yet-pretty-fast minhash/maxhash-related library for Python > 3.8.
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
-.. image:: https://travis-ci.org/lgautier/mashing-pumpkins.svg?branch=master
-    :target: https://travis-ci.org/lgautier/mashing-pumpkins
 
 .. image:: https://img.shields.io/pypi/v/mashing-pumpkins.svg
     :target: https://img.shields.io/pypi/v/mashing-pumpkins.svg
@@ -31,6 +23,11 @@ The design of this package aims at making experimentations with such sketches
 easy to perform while conserving a reasonable performance profile. At the time
 of writing it has a very competitive performance profile both in runtime and
 memory usage when compared to alternatives.
+
+Repository
+^^^^^^^^^^
+
+https://github.com/lgautier/mashing-pumpkins
 
 
 Why Minhash sketches ?
@@ -79,6 +76,7 @@ The design is allowing us to implement with a relatively short code base:
 - Minhash and Maxhash sketches
 - "Count sketches"
 - Demonstrate quickly the comparative efficiency of alternative hashing strategies for double-stranded genomes (see - https://github.com/marbl/Mash/issues/45#issuecomment-274665746)
+
 
 Performance
 """""""""""
@@ -446,7 +444,13 @@ Misc. utilities
 .. automodule:: mashingpumpkins.sequence
    :members:
 
-	     
+LICENSES
+--------
+
+xxHash
+^^^^^^
+.. include:: ../LICENSE-xxHash
+   :literal:
 
 Indices and tables
 ==================
