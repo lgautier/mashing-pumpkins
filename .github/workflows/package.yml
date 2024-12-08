@@ -104,9 +104,12 @@ jobs:
         path: dist/
     - name: Source package path.
       shell: bash
-      run: echo "SRC_DIST=$(ls -1 dist/*.tar.gz | tail -n 1)" >> $GITHUB_ENV
+      run: |
+        ls .
+        ls dist/
+        echo "SRC_DIST=$(ls -1 dist/*.tar.gz | tail -n 1)" >> $GITHUB_ENV
     - name: Test
       run: |
         ${{ matrix.venv_activate }}
-        python -m pip install $SRC_DIST'[test_minimal]'
+        python -m pip install "${SRC_DIST}"'[test_minimal]'
         pytest src/tests/
