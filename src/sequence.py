@@ -16,7 +16,7 @@ def chunkpos_iter(nsize: int, lseq: int, w: int) -> (int, int):
     chunks of length 5:
 
     .. code-block:: text
-       
+
        |0 1 2 3 4 5 6 7 8 9|
         |---------|     :  :
         :     |---------|  :
