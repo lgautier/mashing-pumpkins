@@ -100,15 +100,11 @@ jobs:
         python -m  pip install -U pip wheel
     - uses: actions/download-artifact@v4.1.7
       with:
-        name: mashing-pumpkins-sdist
+        pattern: mashing-pumpkins-sdist
         path: dist/
     - name: Source package path.
       shell: bash
       run: echo "SRC_DIST=$(ls -1 dist/*.tar.gz | tail -n 1)" >> $GITHUB_ENV
-    - name: Install package (non-Windows)
-      run: |
-        ${{ matrix.venv_activate }}
-        pip install $SRC_DIST
     - name: Test
       run: |
         ${{ matrix.venv_activate }}
