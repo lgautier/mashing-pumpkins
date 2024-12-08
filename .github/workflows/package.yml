@@ -105,8 +105,8 @@ jobs:
     - name: Source package path.
       shell: bash
       run: |
-        ls .
-        ls dist/
+        ls -l dist/
+	ls -l dist/mashing-pumpkins-sdist/
         echo "SRC_DIST=$(ls -1 dist/*.tar.gz | tail -n 1)" >> $GITHUB_ENV
     - name: Test
       run: |
