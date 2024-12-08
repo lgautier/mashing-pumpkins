@@ -106,7 +106,7 @@ jobs:
       shell: bash
       run: |
         ls -l dist/
-	ls -l dist/mashing-pumpkins-sdist/
+        ls -l dist/mashing-pumpkins-sdist
         echo "SRC_DIST=$(ls -1 dist/*.tar.gz | tail -n 1)" >> $GITHUB_ENV
     - name: Test
       run: |
