@@ -39,7 +39,7 @@ mmhmash_mod = Extension("%s._murmurhash3_mash" % PACKAGENAME,
 
 xxh_mod = Extension("%s._xxhash" % PACKAGENAME,
                     sources=["src/_xxhash.c", "src/xxhash.c"],
-                    depends=["src/xxhash.h"],
+                    depends=["src/xxhash.h", "src/xxh3.h"],
                     include_dirs=["src",],
                     language="c",
                     extra_compile_args = extra_compile_args + \
