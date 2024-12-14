@@ -108,5 +108,5 @@ jobs:
     - name: Test
       run: |
         ${{ matrix.venv_activate }}
-        python -m pip install "${SRC_DIST}"'[test_minimal]'
+        python -m pip install "${SRC_DIST}"'[test]'
         pytest src/tests/
